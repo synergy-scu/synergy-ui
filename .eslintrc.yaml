@@ -1,0 +1,49 @@
+# https://eslint.org/docs/user-guide/configuring
+---
+parser: "babel-eslint"
+parserOptions:
+    ecmaVersion: 2018
+    sourceType: "module"
+    ecmaFeatures:
+        experimentalObjectRestSpread: true
+        jsx: true
+
+plugins:
+    - "react"
+    - "jest"
+
+extends:
+    - "@proofpoint/ump"
+    - "plugin:react/recommended"
+    - "plugin:jest/recommended"
+
+env:
+    es6: true
+    jest: true
+    jest/globals: true
+    browser: true
+
+
+globals:
+    # enzyme
+    mount: true
+    shallow: true
+    render: true
+
+    # browser
+    document: true
+    fetch: true
+    window: true
+
+rules:
+    camelcase: "off"
+    valid-jsdoc: "off"
+    prefer-promise-reject-errors: "off"
+
+    # using class transform properties
+    no-invalid-this: "off"
+    babel/no-invalid-this: "off"
+
+settings:
+    react:
+        version: "16.6"

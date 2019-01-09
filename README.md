@@ -1,2 +1,2 @@
-# synergy-ui
+# Synergy UI
 Energy Monitoring and Visualization System
