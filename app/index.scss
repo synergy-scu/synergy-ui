@@ -1,0 +1,12 @@
+body {
+
+    @import './components/styles/abstracts';
+
+    width: 100vw;
+    height: 100vh;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+    display: flex;
+    flex-flow: column nowrap;
+}
