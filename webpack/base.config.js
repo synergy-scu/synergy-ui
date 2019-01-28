@@ -8,8 +8,8 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const babelConfiguration = require('../babel.config');
 
-const APP_DIR = path.resolve(__dirname, 'app/');
-const BUILD_DIR = path.resolve(__dirname, 'build/');
+const APP_DIR = path.resolve(__dirname, '../app/');
+const BUILD_DIR = path.resolve(__dirname, '../build/');
 
 const config = {
     entry: [path.join(APP_DIR, 'index.js'), path.join(APP_DIR, 'index.scss')],

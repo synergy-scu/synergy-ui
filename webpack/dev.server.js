@@ -18,4 +18,4 @@ const server = new WebpackDevServer(compiler, {
         'Access-Control-Allow-Origin': '*',
     },
 });
-server.listen(process.env.WEBPACK_PORT || 8082, 'localhost');
+server.listen(process.env.WEBPACK_PORT || 8080, 'localhost');

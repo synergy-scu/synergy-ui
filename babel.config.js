@@ -17,7 +17,6 @@ module.exports = {
     ],
     plugins: [
         'dynamic-import-node',
-        'import-graphql',
         '@babel/plugin-proposal-object-rest-spread',
         '@babel/plugin-proposal-class-properties',
         '@babel/plugin-syntax-dynamic-import',

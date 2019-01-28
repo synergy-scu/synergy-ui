@@ -2,30 +2,21 @@ import React from 'react';
 import { render } from 'react-dom';
 import { Router } from 'react-router-dom';
 import { Provider } from 'react-redux';
-import configureStore from './Store';
-import createHistory from 'history/createHashHistory';
+
+import SynergyStore from './Store';
 
 // import { Heading } from './components/Heading';
-// import { SynergyRouter } from './components/UMPRouter';
-// import { Sidebar } from './components/sidebar/Sidebar';
-import ApplicationContainer from './components/containers/ApplicationContainer';
+import ApplicationContainer from './components/ApplicationContainer';
 
-const history = createHistory();
-const store = configureStore(loadState(), history);
-
-const routes = [
-    { icon: 'pie chart', name: 'Cumulative', path: 'cumulative' },
-    { icon: 'tachometer alternate', name: 'Devices', path: 'devices' },
-    { icon: 'calendar outline', name: 'History', path: 'history' },
-    { icon: 'cog', name: 'Settings', path: 'settings' },
-];
+const store = SynergyStore.store;
+const history = SynergyStore.history;
 
 render(
     <Provider store={store}>
-        <Heading />
+        {/* <Heading /> */}
         <div id='router'>
             <Router history={history}>
-                <ApplicationContainer menu={<Sidebar routes={routes} user={store.user} />} application={<SynergyRouter history={history} />} />
+                <ApplicationContainer history={history} />
             </Router>
         </div>
     </Provider>,
@@ -35,8 +26,8 @@ render(
 if (module.hot) {
     module.hot.accept('./components/Application', () => {
         // eslint-disable-next-line global-require
-        const HotApplicationContainer = require('./components/containers/ApplicationContainer').default;
-        render(<HotApplicationContainer menu={<Sidebar routes={routes} user={store.user} />} application={<SynergyRouter history={history} />} />,
+        const HotApplicationContainer = require('./components/ApplicationContainer').default;
+        render(<HotApplicationContainer history={history} />,
             document.getElementById('app'));
     });
 }
