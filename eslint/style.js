@@ -7,7 +7,7 @@ module.exports = {
     'comma-spacing': ['error'],
     'comma-style': ['error'],
     'computed-property-spacing': ['error', 'never'],
-    'consistent-this': ['error'],
+    'consistent-this': ['error', 'self'],
     'eol-last': ['error'],
     'func-call-spacing': ['error'],
     'indent': ['error', 4, {

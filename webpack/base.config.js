@@ -51,7 +51,7 @@ const config = {
                 loader: 'ignore-loader',
             },
             {
-                test: /\.(svg|woff2|eot|ttf|otf)$/,
+                test: /\.(svg|woff2|eot|ttf|otf|woff)$/,
                 use: ['file-loader'],
             },
             {
