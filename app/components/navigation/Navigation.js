@@ -6,9 +6,13 @@ import { NavLink } from './NavLink';
 export const Navigation = props =>
     <nav className='navigation'>
         {
-            props.routes.map(route =>
-                <NavLink key={`navlink-${route.name}`} {...route} />
-            )
+            props.routes.map(route => {
+                let className = null;
+                if (route.name.toLowerCase() === 'settings') {
+                    className = 'settings-icon';
+                }
+                return <NavLink key={`navlink-${route.name}`} className={className} {...route} />;
+            })
         }
     </nav>;
 
