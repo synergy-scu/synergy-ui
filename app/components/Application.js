@@ -19,10 +19,10 @@ export class Application extends React.Component {
 
     render = () =>
         <Grid className='app-frame' columns={2}>
-            <Grid.Column className='nav-column'>
+            <Grid.Column className='nav-sidebar' width={1}>
                 <Navigation routes={Routes} user={this.props.user} />
             </Grid.Column>
-            <Grid.Column>
+            <Grid.Column width={15} stretched>
                 <SynergyRouter history={this.props.history} />
             </Grid.Column>
         </Grid>;

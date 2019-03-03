@@ -1,12 +1,20 @@
 import React from 'react';
-import { Route, Switch, push } from 'react-router-dom';
+import PropTypes from 'prop-types';
+import { Route, Switch, push as changePage } from 'react-router-dom';
 
-const tempComponent = () => <div></div>;
+import { RealTimeCumulative } from './cards/RealTimeCumulative';
+import { SettingsPane } from './settings/SettingsPane';
+
+const blank = () => <div />;
 
 export const SynergyRouter = () =>
     <div id='router'>
         <Switch>
-            <Route exact path='/' component={tempComponent} />
-            {/* <Route exact path='/settings' component={} /> */}
+            <Route exact path='/' component={blank} />
+            <Route exact path='/settings' component={SettingsPane} />
         </Switch>
     </div>;
+
+SynergyRouter.propTypes = {
+    history: PropTypes.any.isRequired,
+};

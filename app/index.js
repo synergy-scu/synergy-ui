@@ -1,25 +1,37 @@
 import React from 'react';
+import Axios from 'axios';
 import { render } from 'react-dom';
 import { Router } from 'react-router-dom';
 import { Provider } from 'react-redux';
+import { AxiosProvider } from 'react-axios';
 
 import SynergyStore from './Store';
-
-// import { Heading } from './components/Heading';
+import { Heading } from './components/Heading';
 import ApplicationContainer from './components/ApplicationContainer';
+import UserHandlerContainer from './components/login/UserHandlerContainer';
+
+import 'semantic-ui-css/semantic.min.css';
 
 const store = SynergyStore.store;
 const history = SynergyStore.history;
+const instance = Axios.create({
+    baseURL: '/api/',
+    timeout: 5000,
+    method: 'post',
+});
 
 render(
-    <Provider store={store}>
-        {/* <Heading /> */}
-        <div id='router'>
+    <AxiosProvider instance={instance}>
+        <Provider store={store}>
             <Router history={history}>
-                <ApplicationContainer history={history} />
+                <React.Fragment>
+                    {/* <UserHandlerContainer /> */}
+                    <Heading />
+                    <ApplicationContainer history={history} />
+                </React.Fragment>
             </Router>
-        </div>
-    </Provider>,
+        </Provider>
+    </AxiosProvider>,
     document.getElementById('app')
 );
 
