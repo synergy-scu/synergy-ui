@@ -10,7 +10,8 @@ const blank = () => <div />;
 export const SynergyRouter = () =>
     <div id='router'>
         <Switch>
-            <Route exact path='/' component={blank} />
+            {/* <Route exact path='/' component={blank} /> */}
+            <Route exact path='/' component={SettingsPane} />
             <Route exact path='/settings' component={SettingsPane} />
         </Switch>
     </div>;

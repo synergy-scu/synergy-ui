@@ -22,7 +22,7 @@ export class Application extends React.Component {
             <Grid.Column className='nav-sidebar' width={1}>
                 <Navigation routes={Routes} user={this.props.user} />
             </Grid.Column>
-            <Grid.Column width={15} stretched>
+            <Grid.Column width={15} stretched style={{ paddingTop: '0.25em' }}>
                 <SynergyRouter history={this.props.history} />
             </Grid.Column>
         </Grid>;

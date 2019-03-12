@@ -10,14 +10,10 @@ export class UserHandler extends React.Component {
         super(props);
 
         this.state = {
-            isLoginModal: this.props.user === '' || this.props.user === 'unauthorized',
+            isLoginModal: (this.props.user === '' || this.props.user === 'unauthorized') && false,
             isNewUserModal: false,
         };
     }
-
-    static defaultProps = {
-        user: '',
-    };
 
     static propTypes = {
         user: PropTypes.string,

@@ -3,6 +3,9 @@ import PropTypes from 'prop-types';
 import { Grid, Segment } from 'semantic-ui-react';
 
 import { genDevices, genGroups } from '../../api/data';
+import { sortByStringProperty } from '../../api/sort';
+import { addLabelsToSelection } from '../../api/utils';
+import { DeviceListing } from './DeviceListing';
 
 export class GroupsPane extends React.Component {
     constructor(props) {
@@ -10,7 +13,7 @@ export class GroupsPane extends React.Component {
 
         this.state = {
             activeGroup: this.props.groups.keys().next().value,
-            activeMember: this.props.groups.values().next().value.members[0].uuid,
+            activeMember: this.props.groups.values().next().value.members.values().next().value.uuid,
         };
     }
 
@@ -25,7 +28,7 @@ export class GroupsPane extends React.Component {
     setActiveGroup = group => {
         this.setState({
             activeGroup: group.groupID,
-            activeMember: group.members[0].uuid,
+            activeMember: group.members.values().next().value.uuid,
         });
     };
 
@@ -36,10 +39,19 @@ export class GroupsPane extends React.Component {
     };
 
     render() {
+        const iconTypeMap = {
+            group: 'group',
+            device: 'sidebar',
+            channel: 'light',
+        };
         const activeGroup = this.props.groups.get(this.state.activeGroup);
+        const activeMember = activeGroup.members.get(this.state.activeMember);
+        const members = [...activeGroup.members.values()].sort(sortByStringProperty('type')).reverse();
+        addLabelsToSelection(members, 'type');
+
         return (
             <Grid>
-                <Grid.Column width={4}>
+                <Grid.Column width={4} className='squarify'>
                     <Segment.Group>
                         {
                             [...this.props.groups.values()].map((group, idx) => {
@@ -53,17 +65,18 @@ export class GroupsPane extends React.Component {
                                         color={isActive ? 'green' : null}
                                         content={group.name ? group.name : 'Unnamed Group'} />
                                 );
-                            }
-
-                            )
+                            })
                         }
                     </Segment.Group>
                 </Grid.Column>
 
-                <Grid.Column width={4}>
+                <Grid.Column width={4} className='squarify'>
+
                     <Segment.Group>
+                        <Segment inverted color='green' content={activeGroup.name}>
+                        </Segment>
                         {
-                            activeGroup.members.map((member, idx) => {
+                            members.map((member, idx) => {
                                 const isActive = member.uuid === this.state.activeMember;
                                 const _setActive = () => this.setActiveMember(member.uuid);
                                 return (
@@ -71,15 +84,20 @@ export class GroupsPane extends React.Component {
                                         key={`${member.uuid}.${idx}`}
                                         onClick={_setActive}
                                         inverted={isActive}
+                                        tertiary={isActive}
                                         color={isActive ? 'olive' : null}
-                                        content='Member Name' />
+                                        content={member.name ? member.name : 'Unnamed Member'} />
                                 );
                             })
                         }
                     </Segment.Group>
                 </Grid.Column>
 
-                <Grid.Column width={8}>
+                <Grid.Column width={8} className='squarify'>
+                    {
+                        activeMember && activeMember.type === 'device' &&
+                            <DeviceListing {...activeMember} />
+                    }
                 </Grid.Column>
             </Grid>
         );

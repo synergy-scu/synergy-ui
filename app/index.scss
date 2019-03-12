@@ -62,6 +62,13 @@ body {
         }
       }
 
+      .ui.tab {
+          border-radius: 0;
+          border: none;
+          box-shadow: none;
+          -webkit-box-shadow: none;
+      }
+
       @import './components/styles/settings';
     }
   }

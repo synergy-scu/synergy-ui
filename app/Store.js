@@ -5,6 +5,7 @@ import createHistory from 'history/createHashHistory';
 
 import { loadState, saveState } from './localStorage';
 import { default as Reducers } from './reducers';
+import loggerMiddleware from './middleware/loggerMiddleware';
 
 const SynergyStore = () => {
 
@@ -14,6 +15,9 @@ const SynergyStore = () => {
     const appReducers = {
         user: Reducers.user,
         routing: routerReducer,
+        isLoadingQuery: Reducers.isLoadingQuery,
+        entities: Reducers.entities,
+        errors: Reducers.errors,
     };
 
     const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
@@ -23,7 +27,8 @@ const SynergyStore = () => {
         composeEnhancers(
             applyMiddleware(
                 thunk,
-                routerMiddleware(history)
+                routerMiddleware(history),
+                loggerMiddleware
             )
         )
     );

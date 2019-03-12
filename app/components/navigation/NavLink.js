@@ -22,7 +22,7 @@ export const NavLink = ({ name, icon, path, className }) =>
 
 NavLink.defaultProps = {
     className: '',
-}
+};
 
 NavLink.propTypes = {
     name: PropTypes.string.isRequired,

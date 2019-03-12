@@ -4,30 +4,33 @@ import { render } from 'react-dom';
 import { Router } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { AxiosProvider } from 'react-axios';
-import CssBaseline from '@material-ui/core/CssBaseline';
 
 import SynergyStore from './Store';
-// import { Heading } from './components/Heading';
-// import ApplicationContainer from './components/ApplicationContainer';
-// import UserHandlerContainer from './components/login/UserHandlerContainer';
+import { Heading } from './components/Heading';
+import ApplicationContainer from './components/ApplicationContainer';
+import UserHandlerContainer from './components/login/UserHandlerContainer';
+import ActionCreators from './actions';
+
+import 'semantic-ui-css/semantic.min.css';
 
 const store = SynergyStore.store;
 const history = SynergyStore.history;
 const instance = Axios.create({
     baseURL: '/api/',
-    timeout: 5000,
+    timeout: 30000,
     method: 'post',
 });
+
+store.dispatch(ActionCreators.fetchAll({ axios: instance, limit: 10 }));
 
 render(
     <AxiosProvider instance={instance}>
         <Provider store={store}>
             <Router history={history}>
                 <React.Fragment>
-                    <CssBaseline />
-                    {/* <UserHandlerContainer /> */}
-                    {/* <Heading /> */}
-                    {/* <ApplicationContainer history={history} /> */}
+                    <UserHandlerContainer isOpen={false} />
+                    <Heading />
+                    <ApplicationContainer history={history} />
                 </React.Fragment>
             </Router>
         </Provider>

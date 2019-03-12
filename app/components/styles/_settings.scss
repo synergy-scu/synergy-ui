@@ -1,3 +1,51 @@
 #settings {
-    // background-color: #1E1E1E;
+    .squarify {
+        padding: .25rem;
+
+        .ui.segments {
+            box-shadow: none;
+            border-radius: 0;
+
+            & > .ui.segment {
+                border-radius: 0 !important;
+            }
+        }
+
+        .device {
+            .title {
+                display: flex;
+                justify-content: space-between;
+
+                .name {
+                    i {
+                        margin-left: 0.5em !important;
+                    }
+                }
+            }
+
+            .channels {
+                padding: 0;
+
+                .ui.segments {
+                    border: none;
+
+                    .row {
+                        display: flex;
+                        justify-content: space-between;
+
+                        span {
+                            i:first-of-type {
+                                margin-right: .5rem;
+                            }
+                        }
+                    }
+
+                    .ui.divider {
+                        margin: 0 auto;
+                        width: 90%;
+                    }
+                }
+            }
+        }
+    }
 }
