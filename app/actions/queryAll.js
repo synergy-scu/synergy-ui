@@ -15,12 +15,13 @@ export const fetchAllNew = () => {
     };
 };
 
-export const fetchAllNewEntity = ({ requestID, entityType }) => {
+export const fetchAllNewEntity = ({ requestID, entityType, requests }) => {
     return {
         type: Actions.FETCH_ALL_NEW_ENTITY,
         payload: {
             requestID,
             entityType,
+            requests,
         },
     };
 };
@@ -37,34 +38,45 @@ export const fetchAllStart = ({ requestID, entityType, limit, offset }) => {
     };
 };
 
-export const fetchAllSuccess = ({ requestID, entityType, data }) => {
+export const fetchAllSuccess = ({ requestID, entityType, data, offset }) => {
     return {
         type: Actions.FETCH_ALL_SUCCESS,
         payload: {
             requestID,
             entityType,
             data,
+            offset,
         },
     };
 };
 
-export const fetchAllError = ({ requestID, entityType, error }) => {
+export const fetchAllError = ({ requestID, entityType, offset, error }) => {
     return {
         type: Actions.FETCH_ALL_ERROR,
         payload: {
             requestID,
             entityType,
+            offset,
             error,
         },
     };
 };
 
-export const fetchAllFinish = ({ requestID, entityType }) => {
+export const fetchAllFinishEntity = ({ requestID, entityType }) => {
+    return {
+        type: Actions.FETCH_ALL_FINISH_ENTITY,
+        payload: {
+            requestID,
+            entityType,
+        },
+    };
+};
+
+export const fetchAllFinish = ({ requestID }) => {
     return {
         type: Actions.FETCH_ALL_FINISH,
         payload: {
             requestID,
-            entityType,
         },
     };
 };
@@ -81,11 +93,17 @@ export const fetchAll = ({ axios, limit }) => dispatch => {
             ? response.data.payload
             : Promise.reject(new Error('An error occured getting the total number of entities. This is a fatal error'))
     ).then(counts => {
+        let promises = [];
         Object.entries(counts).forEach(([ entity, count ]) => {
 
             const requests = Math.ceil(count / limit);
+            dispatch(fetchAllNewEntity({
+                requestID: id,
+                entityType: entity,
+                requests,
+            }));
 
-            const promises = new Array(requests).fill(0).map((item, idx) => {
+            const entityPromises = new Array(requests).fill(0).map((item, idx) => {
                 const offset = idx * limit;
 
                 dispatch(fetchAllStart({
@@ -102,6 +120,7 @@ export const fetchAll = ({ axios, limit }) => dispatch => {
                             requestID: id,
                             error: `Failed to fetch all ${entity}: Request timed out`,
                             entityType: entity,
+                            offset,
                         }));
                     }
                 }, FETCH_ALL_TIMEOUT);
@@ -124,6 +143,7 @@ export const fetchAll = ({ axios, limit }) => dispatch => {
                         requestID: id,
                         data: data.payload,
                         entityType: entity,
+                        offset,
                     }));
                 }).catch(error => {
                     isResolved = true;
@@ -132,16 +152,25 @@ export const fetchAll = ({ axios, limit }) => dispatch => {
                         requestID: id,
                         error,
                         entityType: entity,
+                        offset,
                     }));
                 });
             });
 
-            Promise.all(promises).then(() => {
-                dispatch(fetchAllFinish({
+            promises = promises.concat(entityPromises);
+
+            Promise.all(entityPromises).then(() => {
+                dispatch(fetchAllFinishEntity({
                     requestID: id,
                     entityType: entity,
                 }));
             });
+        });
+
+        Promise.all(promises).then(() => {
+            dispatch(fetchAllFinish({
+                requestID: id,
+            }));
         });
     }).catch(error => {
         console.error(error);
