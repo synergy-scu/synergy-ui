@@ -1,6 +1,15 @@
 #settings {
+    .ui.menu {
+        .ui.category.search {
+            input {
+                border: none;
+            }
+        }
+    }
+
     .squarify {
         padding: .25rem;
+        overflow-y: scroll;
 
         .ui.segments {
             box-shadow: none;
@@ -10,42 +19,39 @@
                 border-radius: 0 !important;
             }
         }
+    }
 
-        .device {
-            .title {
-                display: flex;
-                justify-content: space-between;
+    .entity-listing {
+        .listing {
+            display: flex;
+            justify-content: space-between;
+            margin: 0;
+            padding: 1em 0;
 
-                .name {
-                    i {
-                        margin-left: 0.5em !important;
-                    }
-                }
-            }
-
-            .channels {
-                padding: 0;
-
-                .ui.segments {
-                    border: none;
-
-                    .row {
-                        display: flex;
-                        justify-content: space-between;
-
-                        span {
-                            i:first-of-type {
-                                margin-right: .5rem;
-                            }
-                        }
-                    }
-
-                    .ui.divider {
-                        margin: 0 auto;
-                        width: 90%;
-                    }
+            span {
+                i:first-of-type {
+                    margin-right: .5rem;
                 }
             }
         }
+
+        .ui.divider {
+            margin: 0 auto;
+            width: 95%;
+        }
     }
+
+    .ui.accordion {
+        .title {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .entity-listing {
+            .listing {
+                padding: 1em;
+            }
+        }
+    }
+
 }

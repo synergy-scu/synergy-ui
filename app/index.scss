@@ -1,75 +1,82 @@
 body {
-  @import './components/styles/abstracts';
+    @import './components/styles/abstracts';
 
-  width: 100vw;
-  height: 100vh;
-  padding: 0;
-  margin: 0;
-  overflow: hidden;
-  display: flex;
-  flex-flow: column nowrap;
+    width: 100vw;
+    height: 100vh;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+    display: flex;
+    flex-flow: column nowrap;
 
-  a {
-    color: inherit;
+    a {
+        color: inherit;
 
-    &:hover {
-      color: inherit;
-    }
-  }
-
-  #app {
-    #heading {
-      height: 7%;
-      width: 100%;
-      display: flex;
-      margin: 0;
-      background-color: rgba($color: #000000, $alpha: 0.9);
-
-      .heading-sidebar {
-        background-color: #004D00;
-      }
-
-      .ui.container.user {
-        display: flex;
-        justify-content: flex-end;
-        margin: 0 !important;
-        width: 100%;
-      }
+        &:hover {
+            color: inherit;
+        }
     }
 
-    .app-frame {
-      width: 100%;
-      height: 93%;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-flow: row nowrap;
+    #app {
+        #heading {
+            height: 7%;
+            width: 100%;
+            display: flex;
+            margin: 0;
+            background-color: rgba($color: #000000, $alpha: 0.9);
 
-      .nav-sidebar {
-        background-color: #001E00;
-        display: flex;
-        flex-flow: column;
-        align-items: center;
-        padding: 1%;
+            .heading-sidebar {
+                background-color: #004D00;
+            }
 
-        a[href='#/settings'] {
-          position: absolute;
-          bottom: 1em;
+            .ui.container.user {
+                display: flex;
+                justify-content: flex-end;
+                margin: 0 !important;
+                width: 100%;
+            }
         }
 
-        i.inverted.icon {
-          padding: 1.5em 0;
+        .app-frame {
+            width: 100%;
+            height: 93%;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-flow: row nowrap;
+
+            .nav-sidebar {
+                background-color: #001E00;
+                display: flex;
+                flex-flow: column;
+                align-items: center;
+                padding: 1%;
+
+                a[href='#/settings'] {
+                    position: absolute;
+                    bottom: 1em;
+                }
+
+                i.inverted.icon {
+                    padding: 1.5em 0;
+                }
+            }
+
+            .ui.tab {
+                border-radius: 0;
+                border: none;
+                box-shadow: none;
+                -webkit-box-shadow: none;
+            }
+            @import './components/styles/settings';
         }
-      }
-
-      .ui.tab {
-          border-radius: 0;
-          border: none;
-          box-shadow: none;
-          -webkit-box-shadow: none;
-      }
-
-      @import './components/styles/settings';
     }
-  }
+}
+
+::-webkit-scrollbar {
+    width: 0;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
 }
