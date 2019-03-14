@@ -3,19 +3,18 @@ import PropTypes from 'prop-types';
 import { Route, Switch, push as changePage } from 'react-router-dom';
 
 import { RealTimeCumulative } from './cards/RealTimeCumulative';
-import { SettingsPane } from './settings/SettingsPane';
+import SettingsPaneContainer from './settings/SettingsPaneContainer';
 
 const blank = () => <div />;
 
 export const SynergyRouter = () =>
-    <div id='router'>
+    <div id="router">
         <Switch>
             {/* <Route exact path='/' component={blank} /> */}
-            <Route exact path='/' component={SettingsPane} />
-            <Route exact path='/settings' component={SettingsPane} />
+            <Route exact path="/" component={SettingsPaneContainer} />
+            <Route exact path="/settings" component={SettingsPaneContainer} />
         </Switch>
     </div>;
-
 SynergyRouter.propTypes = {
     history: PropTypes.any.isRequired,
 };
