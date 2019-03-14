@@ -8,30 +8,26 @@ import { default as Reducers } from './reducers';
 import loggerMiddleware from './middleware/loggerMiddleware';
 
 const SynergyStore = () => {
-
     const history = createHistory();
     const initialState = loadState();
 
     const appReducers = {
         user: Reducers.user,
         routing: routerReducer,
+
         isLoadingQuery: Reducers.isLoadingQuery,
+        currentRequest: Reducers.currentRequest,
         entities: Reducers.entities,
         errors: Reducers.errors,
+
+        settingsTab: Reducers.settingsTab,
+        activeGroup: Reducers.activeGroup,
+        activeDevice: Reducers.activeDevice,
+        activeChannel: Reducers.activeChannel,
     };
 
     const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
-    const store = createStore(
-        combineReducers(appReducers),
-        initialState,
-        composeEnhancers(
-            applyMiddleware(
-                thunk,
-                routerMiddleware(history),
-                loggerMiddleware
-            )
-        )
-    );
+    const store = createStore(combineReducers(appReducers), initialState, composeEnhancers(applyMiddleware(thunk, routerMiddleware(history), loggerMiddleware)));
 
     return {
         history,
