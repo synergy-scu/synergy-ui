@@ -5,7 +5,7 @@ import { Grid } from 'semantic-ui-react';
 import { SynergyRouter } from './SynergyRouter';
 import { Navigation } from './navigation/Navigation';
 
-import Routes from '../api/Routes';
+import Routes from '../api/constants/Routes';
 
 export class Application extends React.Component {
     constructor(props) {
