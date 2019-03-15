@@ -157,7 +157,20 @@ export const entities = (state = defaultEntities, action) => {
             return { ...state };
         case Actions.FETCH_SUCCESS:
             return state;
-        case Actions.EXTRACT_CHANNELS: {
+        case Actions.EXTRACT_ALL_CHANNELS: {
+            const groups = new Map(state.groups);
+            state.groups.forEach(group => {
+                groups.set(group.groupID, {
+                    ...group,
+                    extracted: extractChannels(group, state),
+                });
+            });
+            return {
+                ...state,
+                groups,
+            };
+        }
+        case Actions.EXTRACT_CHANNELS:
             action.payload.groups.forEach(group => {
                 state.groups.set(group.groupID, {
                     ...group,
@@ -165,7 +178,6 @@ export const entities = (state = defaultEntities, action) => {
                 });
             });
             return { ...state };
-        }
 
         default:
             return state;

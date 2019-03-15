@@ -8,3 +8,9 @@ export const extractChannels = groups => {
         },
     };
 };
+
+export const extractAllChannels = () => {
+    return {
+        type: Actions.EXTRACT_ALL_CHANNELS,
+    };
+};

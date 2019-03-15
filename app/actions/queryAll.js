@@ -1,10 +1,10 @@
 import uuidv4 from 'uuid/v4';
 
 import Actions from './types';
+import { extractAllChannels } from './entities';
+import { validResponse } from '../api/requests';
 
 const FETCH_ALL_TIMEOUT = 30 * 1000; // 30 seconds
-
-export const validResponse = response => response.status === 200 && response.hasOwnProperty('data') && response.data.hasOwnProperty('payload') && response.data.valid;
 
 export const fetchAllNew = () => {
     return {
@@ -171,6 +171,7 @@ export const fetchAll = ({ axios, limit }) => dispatch => {
             dispatch(fetchAllFinish({
                 requestID: id,
             }));
+            dispatch(extractAllChannels());
         });
     }).catch(error => {
         console.error(error);

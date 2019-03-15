@@ -1,9 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Accordion, Icon, Label } from 'semantic-ui-react';
+
 import { EntityListing } from './EntityListing';
 
-export const EntityAccordion = props =>
+export const GroupAccordion = props =>
     <React.Fragment>
         <Accordion.Title active={props.isActive} index={props.index} onClick={props.handleTitleClick}>
             <div className='left'>
@@ -22,11 +23,11 @@ export const EntityAccordion = props =>
         </Accordion.Content>
     </React.Fragment>;
 
-EntityAccordion.defaultProps = {
+GroupAccordion.defaultProps = {
     isActive: true,
 };
 
-EntityAccordion.propTypes = {
+GroupAccordion.propTypes = {
     isActive: PropTypes.bool.isRequired,
     index: PropTypes.number.isRequired,
     title: PropTypes.string.isRequired,

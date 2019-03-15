@@ -24,6 +24,9 @@ const SynergyStore = () => {
         activeGroup: Reducers.activeGroup,
         activeDevice: Reducers.activeDevice,
         activeChannel: Reducers.activeChannel,
+
+        editTab: Reducers.editTab,
+        showEditModal: Reducers.showEditModal,
     };
 
     const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;

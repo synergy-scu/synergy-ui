@@ -1,5 +1,8 @@
 import RequestStates from './constants/RequestStates';
 
+export const validResponse = response => response.status === 200 && response.hasOwnProperty('data') && response.data.hasOwnProperty('payload') && response.data.valid;
+export const invalidRespone = response => response.status === 200 && response.hasOwnProperty('data') && response.data.hasOwnProperty('valid') && !response.data.valid;
+
 export const fetchRequest = ({
     id = null,
     start = 0,

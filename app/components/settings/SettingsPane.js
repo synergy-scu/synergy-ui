@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Tab } from 'semantic-ui-react';
 
 import SettingsTabContainer from './SettingsTabContainer';
-import TabPanes from './TabPanes';
+import TabPanes from './menus/TabPanes';
 
 export class SettingsPane extends React.Component {
     constructor(props) {
@@ -34,8 +34,7 @@ export class SettingsPane extends React.Component {
                         render: () =>
                             <Tab.Pane attached={false}>
                                 <ConnectedPane />
-                            </Tab.Pane>
-                        ,
+                            </Tab.Pane>,
                     };
                 })}
                 activeIndex={this.props.activeTab}

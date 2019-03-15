@@ -2,9 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Grid, Segment } from 'semantic-ui-react';
 
-import { EntityMenu } from './EntityMenu';
-import { EntityListing } from './EntityListing';
-import { sortByNumericProperty } from '../../api/sort';
+import { EntityMenu } from '../sections/EntityMenu';
+import { EntityListing } from '../sections/EntityListing';
+import { sortByNumericProperty } from '../../../api/sort';
 
 export class DevicesMenu extends React.Component {
     constructor(props) {

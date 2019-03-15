@@ -34,6 +34,7 @@ export class GlobalSearch extends React.Component {
                     isLoading: false,
                     results: [],
                 });
+                return;
             }
 
             const re = new RegExp(escapeRegExp(value), 'i');

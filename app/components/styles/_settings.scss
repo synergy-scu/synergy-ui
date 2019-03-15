@@ -11,17 +11,21 @@
         padding: .25rem;
         overflow-y: scroll;
 
-        .ui.segments {
-            box-shadow: none;
-            border-radius: 0;
+        .ui.transparent.input {
+            border-bottom: 1px solid rgba(34,36,38,.15);
+            padding: .25em;
+            margin-bottom: .5em;
 
-            & > .ui.segment {
-                border-radius: 0 !important;
+            &:focus-within {
+                border-bottom-color: #767676;
             }
         }
     }
 
     .entity-listing {
+        height: 100%;
+        overflow-y: auto;
+
         .listing {
             display: flex;
             justify-content: space-between;
@@ -38,6 +42,33 @@
         .ui.divider {
             margin: 0 auto;
             width: 95%;
+        }
+    }
+
+    .add-menu {
+        .element,
+        .heading {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .heading {
+            padding: 0;
+        }
+
+        .ui.transparent.input {
+            border-bottom: 1px solid rgba(34,36,38,.15);
+            padding: .25em;
+            margin-bottom: .5em;
+
+            &:focus-within {
+                border-bottom-color: #767676;
+            }
+        }
+
+        .ui.segments {
+            height: 100%;
+            overflow-y: auto;
         }
     }
 

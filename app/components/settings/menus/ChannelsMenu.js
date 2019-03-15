@@ -1,10 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Container } from 'semantic-ui-react';
 
-import { EntityListing } from './EntityListing';
+import { EntityListing } from '../sections/EntityListing';
 
 export const ChannelsMenu = props =>
-    <div className='squarify'>
+    <Container text className='squarify'>
         <EntityListing
             entityType='channel'
             activeItem={props.activeChannel}
@@ -16,7 +17,7 @@ export const ChannelsMenu = props =>
                         name: channel.name,
                     };
                 })} />
-    </div>;
+    </Container>;
 
 ChannelsMenu.propTypes = {
     entities: PropTypes.shape({

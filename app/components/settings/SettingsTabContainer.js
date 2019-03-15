@@ -17,6 +17,7 @@ export const mapDispatch = dispatch => {
         changeActiveGroup: groupID => dispatch(ActionCreators.changeActiveGroup(groupID)),
         changeActiveDevice: deviceID => dispatch(ActionCreators.changeActiveDevice(deviceID)),
         changeActiveChannel: channelID => dispatch(ActionCreators.changeActiveChannel(channelID)),
+        extractChannels: groups => dispatch(ActionCreators.extractChannels(groups)),
     };
 };
 

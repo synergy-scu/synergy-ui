@@ -11,7 +11,7 @@ export const mapState = state => {
 
 export const mapDispatch = dispatch => {
     return {
-        changeTab: tabIndex => dispatch(ActionCreators.changeTab(tabIndex)),
+        changeTab: tabIndex => dispatch(ActionCreators.changeSettingsTab(tabIndex)),
     };
 };
 

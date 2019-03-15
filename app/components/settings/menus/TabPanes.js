@@ -3,12 +3,14 @@ import React from 'react';
 import { GroupsMenu } from './GroupsMenu';
 import { DevicesMenu } from './DevicesMenu';
 import { ChannelsMenu } from './ChannelsMenu';
-import GlobalSearchContainer from './GlobalSearch';
+import { AddMenu } from './AddMenu';
+
+import GlobalSearchContainer from '../GlobalSearch';
 
 export default [
     {
         menuItem: { key: 'add', icon: 'plus' },
-        component: GroupsMenu,
+        component: AddMenu,
         entity: 'add',
     },
     {
