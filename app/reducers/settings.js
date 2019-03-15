@@ -1,5 +1,5 @@
 import Actions from '../actions';
-import TabPanes from '../components/settings/TabPanes';
+import TabPanes from '../components/settings/menus/TabPanes';
 
 const TabIndicies = TabPanes.reduce((accumulator, tab, idx) => {
     accumulator[tab.entity] = idx;
@@ -8,8 +8,8 @@ const TabIndicies = TabPanes.reduce((accumulator, tab, idx) => {
 
 export const settingsTab = (state = 1, action) => {
     switch (action.type) {
-        case Actions.CHANGE_TAB:
-            if (action.payload.tabIndex > 0 && action.payload.tabIndex < 4) {
+        case Actions.CHANGE_SETTINGS_TAB:
+            if (action.payload.tabIndex < TabPanes.length) {
                 return action.payload.tabIndex;
             }
             return state;
@@ -62,6 +62,26 @@ export const activeChannel = (state = '', action) => {
                 return action.payload.uuid;
             }
             return state;
+        default:
+            return state;
+    }
+};
+
+export const showEditModal = (state = false, action) => {
+    switch (action.type) {
+        case Actions.TOOGLE_EDIT_MODAL:
+            return !state;
+        default:
+            return state;
+    }
+};
+
+export const editTab = (state = 0, action) => {
+    switch (action.type) {
+        case Actions.TOOGLE_EDIT_MODAL:
+            return 0;
+        case Actions.CHANGE_EDIT_TAB:
+            return action.payload.tabIndex;
         default:
             return state;
     }

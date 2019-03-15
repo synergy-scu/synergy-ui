@@ -10,9 +10,9 @@ export const selectSearch = ({ entity, uuid }) => {
     };
 };
 
-export const changeTab = tabIndex => {
+export const changeSettingsTab = tabIndex => {
     return {
-        type: Actions.CHANGE_TAB,
+        type: Actions.CHANGE_SETTINGS_TAB,
         payload: {
             tabIndex,
         },
@@ -42,6 +42,21 @@ export const changeActiveChannel = channelID => {
         type: Actions.CHANGE_ACTIVE_CHANNEL,
         payload: {
             channelID,
+        },
+    };
+};
+
+export const toggleEditModal = () => {
+    return {
+        type: Actions.TOOGLE_EDIT_MODAL,
+    };
+};
+
+export const changeEditTab = tabIndex => {
+    return {
+        type: Actions.CHANGE_EDIT_TAB,
+        payload: {
+            tabIndex,
         },
     };
 };
