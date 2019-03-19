@@ -1,4 +1,14 @@
+const usageActions = {
+    INITIALIZE_USAGE: 'INITIALIZE_USAGE',
+    USAGE_START: 'USAGE_START',
+    USAGE_SUCCESS: 'USAGE_SUCCESS',
+    USAGE_ERROR: 'USAGE_ERROR',
+    USAGE_END: 'USAGE_END',
+};
+
 export default {
+    ...usageActions,
+
     CHANGE_USER: 'CHANGE_USER',
 
     LOGIN_START: 'LOGIN_START',

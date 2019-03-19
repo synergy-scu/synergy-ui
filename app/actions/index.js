@@ -5,6 +5,7 @@ import * as UserActions from './application';
 import * as QueryAllActions from './queryAll';
 import * as EntityActions from './entities';
 import * as SettingsActions from './settings';
+import * as UsageActions from './usage';
 
 export default {
     ...Actions,
@@ -13,4 +14,5 @@ export default {
     ...QueryAllActions,
     ...EntityActions,
     ...SettingsActions,
+    ...UsageActions,
 };

@@ -27,6 +27,8 @@ const SynergyStore = () => {
 
         editTab: Reducers.editTab,
         showEditModal: Reducers.showEditModal,
+
+        cumulative: Reducers.cumulative,
     };
 
     const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
