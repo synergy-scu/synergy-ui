@@ -1,8 +1,7 @@
 import uuidv4 from 'uuid/v4';
 
 import Actions from './types';
-import { extractAllChannels } from './entities';
-import { validResponse } from '../api/requests';
+import { capitalize } from '../api/utils';
 
 const FETCH_ALL_TIMEOUT = 30 * 1000; // 30 seconds
 
@@ -15,59 +14,34 @@ export const fetchAllNew = () => {
     };
 };
 
-export const fetchAllNewEntity = ({ requestID, entityType, requests }) => {
-    return {
-        type: Actions.FETCH_ALL_NEW_ENTITY,
-        payload: {
-            requestID,
-            entityType,
-            requests,
-        },
-    };
-};
-
-export const fetchAllStart = ({ requestID, entityType, limit, offset }) => {
+export const fetchAllStart = ({ requestID, entityType }) => {
     return {
         type: Actions.FETCH_ALL_START,
         payload: {
             requestID,
             entityType,
-            limit,
-            offset,
         },
     };
 };
 
-export const fetchAllSuccess = ({ requestID, entityType, data, offset }) => {
+export const fetchAllSuccess = ({ requestID, entityType, data }) => {
     return {
         type: Actions.FETCH_ALL_SUCCESS,
         payload: {
             requestID,
             entityType,
             data,
-            offset,
         },
     };
 };
 
-export const fetchAllError = ({ requestID, entityType, offset, error }) => {
+export const fetchAllError = ({ requestID, entityType, error }) => {
     return {
         type: Actions.FETCH_ALL_ERROR,
         payload: {
             requestID,
             entityType,
-            offset,
             error,
-        },
-    };
-};
-
-export const fetchAllFinishEntity = ({ requestID, entityType }) => {
-    return {
-        type: Actions.FETCH_ALL_FINISH_ENTITY,
-        payload: {
-            requestID,
-            entityType,
         },
     };
 };
@@ -81,99 +55,52 @@ export const fetchAllFinish = ({ requestID }) => {
     };
 };
 
-export const fetchAll = ({ axios, limit }) => dispatch => {
+export const fetchAll = ({ axios }) => dispatch => {
+    const routes = ['group', 'device', 'channel'];
+
     const newFetchAll = fetchAllNew();
     const id = newFetchAll.payload.requestID;
     dispatch(newFetchAll);
 
-    axios.post('count', {
-        type: 'all',
-    }).then(response =>
-        validResponse(response)
-            ? response.data.payload
-            : Promise.reject(new Error('An error occured getting the total number of entities. This is a fatal error'))
-    ).then(counts => {
-        let promises = [];
-        Object.entries(counts).forEach(([ entity, count ]) => {
+    const promises = routes.map(route => {
+        const entityType = `${route}s`;
 
-            const requests = Math.ceil(count / limit);
-            dispatch(fetchAllNewEntity({
-                requestID: id,
-                entityType: entity,
-                requests,
-            }));
+        let isResolved = false;
+        dispatch(fetchAllStart({ requestID: id, entityType }));
 
-            const entityPromises = new Array(requests).fill(0).map((item, idx) => {
-                const offset = idx * limit;
-
-                dispatch(fetchAllStart({
+        setTimeout(() => {
+            if (!isResolved) {
+                dispatch(fetchAllError({
                     requestID: id,
-                    entityType: entity,
-                    limit,
-                    offset,
+                    entityType,
+                    error: `${capitalize(entityType)} Query Timed Out`,
                 }));
+            }
+        }, FETCH_ALL_TIMEOUT);
 
-                let isResolved = false;
-                setTimeout(() => {
-                    if (!isResolved) {
-                        dispatch(fetchAllError({
-                            requestID: id,
-                            error: `Failed to fetch all ${entity}: Request timed out`,
-                            entityType: entity,
-                            offset,
-                        }));
-                    }
-                }, FETCH_ALL_TIMEOUT);
-
-                return axios.post(entity.substring(0, entity.length - 1), {
-                    type: 'multiplex',
-                    payload: {
-                        count: limit,
-                        offset,
-                    },
-                }).then(response =>
-                    validResponse(response)
-                        ? response.data
-                        : Promise.reject(new Error(
-                            `An error occured executing the fetch request for ${entity}`,
-                        ))
-                ).then(data => {
-                    isResolved = true;
-                    dispatch(fetchAllSuccess({
-                        requestID: id,
-                        data: data.payload,
-                        entityType: entity,
-                        offset,
-                    }));
-                }).catch(error => {
-                    isResolved = true;
-                    console.warn(error);
-                    dispatch(fetchAllError({
-                        requestID: id,
-                        error,
-                        entityType: entity,
-                        offset,
-                    }));
-                });
-            });
-
-            promises = promises.concat(entityPromises);
-
-            Promise.all(entityPromises).then(() => {
-                dispatch(fetchAllFinishEntity({
+        return axios.post(route, {})
+            .then(response =>
+                response.data
+                    ? response.data
+                    : Promise.reject(response)
+            ).then(data => {
+                isResolved = true;
+                dispatch(fetchAllSuccess({
                     requestID: id,
-                    entityType: entity,
+                    entityType,
+                    data: data.data,
+                }));
+            }).catch(error => {
+                isResolved = true;
+                dispatch(fetchAllError({
+                    requestID: id,
+                    entityType,
+                    error,
                 }));
             });
-        });
+    });
 
-        Promise.all(promises).then(() => {
-            dispatch(fetchAllFinish({
-                requestID: id,
-            }));
-            dispatch(extractAllChannels());
-        });
-    }).catch(error => {
-        console.error(error);
+    Promise.all(promises).then(() => {
+        dispatch(fetchAllFinish({ requestID: id }));
     });
 };

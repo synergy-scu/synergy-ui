@@ -1,41 +1,45 @@
-export const normalizeGroup = ({ groupID, name, id, ...group }) => {
-    // Extracting the 'id' so it doesnt get included in ...groups
-    const entityTypes = ['channel', 'device', 'group'];
-    const members = new Map();
-    entityTypes.forEach(type => {
-        group[`${type}s`].forEach(entity => {
-            const uuid = entity[`${type}ID`];
-            members.set(uuid, {
-                uuid,
-                name: entity.name,
-                type,
-            });
-        });
-    });
-
+export const normalizeGroup = ({ name, groupID, members, created, updated }) => {
     return {
+        key: groupID,
         name,
         groupID,
-        members,
+        count: members,
+        members: [],
+        created: new Date(created),
+        updated: new Date(updated),
     };
 };
 
-export const normalizeDevice = ({ name, deviceID, channels, id, ...device }) => {
+export const normalizeGroupMember = ({ groupID, uuid, type, added }) => {
+    return {
+        groupID,
+        uuid,
+        type,
+        added: new Date(added),
+    };
+};
+
+export const normalizeDevice = ({ name, deviceID, channels, created, updated }) => {
     // Extracting the 'id' so it doesnt get included in ...device
     return {
+        key: deviceID,
         name,
         deviceID,
         count: channels,
-        channels: new Set(Object.values(device).filter(channel => Boolean(channel))),
+        channels: new Map(),
+        created: new Date(created),
+        updated: new Date(updated),
     };
 };
 
-export const normalizeChannel = ({ name, channelID, deviceID, position }) => {
+export const normalizeChannel = ({ name, channelID, deviceID, created, updated }) => {
     return {
+        key: channelID,
         name,
         channelID,
         deviceID,
-        position,
+        created: new Date(created),
+        updated: new Date(updated),
     };
 };
 
@@ -76,6 +80,8 @@ export const normalize = (data, entityType) => {
     switch (entityType) {
         case 'groups':
             return normalizeGroup(data);
+        case 'groupling':
+            return normalizeGroupMember(data);
         case 'devices':
             return normalizeDevice(data);
         case 'channels':

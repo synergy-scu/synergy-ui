@@ -146,15 +146,42 @@ export const currentRequest = (state = fetchAllRequest({}), action) => {
 const defaultEntities = { groups: new Map(), devices: new Map(), channels: new Map() };
 export const entities = (state = defaultEntities, action) => {
     switch (action.type) {
-        case Actions.FETCH_ALL_SUCCESS:
-            if (Array.isArray(action.payload.data)) {
-                const entityName = action.payload.entityType.substring(0, action.payload.entityType.length - 1);
-                action.payload.data.forEach(entity => {
-                    const normalizedEntity = normalize(entity, action.payload.entityType);
-                    state[action.payload.entityType].set(entity[entityName.concat('ID')], normalizedEntity);
-                });
+        case Actions.FETCH_ALL_SUCCESS: {
+            switch (action.payload.entityType) {
+                case 'channels':
+                case 'devices':
+                    if (Array.isArray(action.payload.data)) {
+                        action.payload.data.forEach(entity => {
+                            const normalizedEntity = normalize(entity, action.payload.entityType);
+                            state[action.payload.entityType].set(normalizedEntity.key, normalizedEntity);
+                        });
+
+                        return { ...state };
+                    }
+                    return state;
+                case 'groups':
+                    if (Array.isArray(action.payload.data.groups)) {
+                        action.payload.data.groups.forEach(group => {
+                            console.log(group);
+                            const normalizedEntity = normalize(group, action.payload.entityType);
+                            console.log(normalizedEntity);
+                            state.groups.set(normalizedEntity.key, normalizedEntity);
+                        });
+                    }
+
+                    if (Array.isArray(action.payload.data.members)) {
+                        action.payload.data.members.forEach(member => {
+                            const group = state.groups.get(member.groupID);
+                            group.members.push(normalize(member, 'groupling'));
+                            state.groups.set(group.key, group);
+                        });
+                    }
+                    console.log(state);
+                    return { ...state };
+                default:
+                    return state;
             }
-            return { ...state };
+        }
         case Actions.FETCH_SUCCESS:
             return state;
         case Actions.EXTRACT_ALL_CHANNELS: {

@@ -216,7 +216,7 @@ export class AddMenu extends React.Component {
 
                         return (
                             <Segment key={item.uuid} disabled={isDisabled} className="element">
-                                <span>{item.name ? item.name : `Unnamed ${capitalize(item.type)}`}</span>
+                                <span>{item.name ? item.name : `Unnamed ${capitalize(item.type)}`}<span className='secondary'>{item.type}</span></span>
                                 <Checkbox toggle disabled={isDisabled} checked={this.state.selection.has(item.uuid)} onChange={_selectItem} />
                             </Segment>
                         );

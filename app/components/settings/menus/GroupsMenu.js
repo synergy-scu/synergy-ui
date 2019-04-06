@@ -42,13 +42,9 @@ export class GroupsMenu extends React.Component {
             channels: [],
         };
         group.members.forEach(member => {
-            if (member.type === 'group') {
-                result.groups.push(member);
-            } else if (member.type === 'device') {
-                result.devices.push(member);
-            } else if (member.type === 'channel') {
-                result.channels.push(member);
-            }
+            const type = `${member.type}s`;
+            const memberDetails = this.props.entities[type].get(member.uuid);
+            result[type].push(memberDetails);
         });
         return result;
     };

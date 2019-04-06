@@ -21,7 +21,7 @@ const instance = Axios.create({
     method: 'post',
 });
 
-store.dispatch(ActionCreators.fetchAll({ axios: instance, limit: 10 }));
+store.dispatch(ActionCreators.fetchAll({ axios: instance }));
 
 render(
     <AxiosProvider instance={instance}>
