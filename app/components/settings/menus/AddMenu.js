@@ -1,11 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Segment, Input, Checkbox, Button, Header, Popup, Container } from 'semantic-ui-react';
-import { escapeRegExp, isEqual, filter, debounce } from 'lodash';
+import { escapeRegExp, isEqual, filter, debounce, orderBy } from 'lodash';
 import memoize from 'memoize-one';
 
 import { capitalize } from '../../../api/utils';
-import { sortByStringProperty } from '../../../api/sort';
+import { getSortFunctions } from '../../../api/sort';
 
 export class AddMenu extends React.Component {
     constructor(props) {
@@ -43,6 +43,7 @@ export class AddMenu extends React.Component {
             selectionError: false,
             selectionValidationError: false,
             isErrorVisible: false,
+            hideDisabled: false,
         });
     };
 
@@ -103,6 +104,12 @@ export class AddMenu extends React.Component {
         });
     };
 
+    hideDisabledItems = (event, { checked }) => {
+        this.setState({
+            hideDisabled: checked,
+        });
+    };
+
     selectItem = (checked, item) => {
         this.setState({ isErrorVisible: false });
 
@@ -148,11 +155,14 @@ export class AddMenu extends React.Component {
     filterItems = memoize((value, items) => filter(items, this.isMatch(value)), isEqual);
 
     render() {
-        const entities = ['group', 'device', 'channel'];
         let items = [];
+        const entities = ['group', 'device', 'channel'];
+        const sorters = getSortFunctions(['name', 'created']);
+        const sortDirections = ['ASC', 'DESC'];
+
         entities.forEach(entity => {
             const selector = `${entity}s`;
-            const newItems = [...this.props.entities[selector].values()].map(item => {
+            let nextEntity = [...this.props.entities[selector].values()].map(item => {
                 return {
                     ...item,
                     uuid: item[`${entity}ID`],
@@ -161,12 +171,14 @@ export class AddMenu extends React.Component {
             });
 
             if (entity === 'channel') {
-                newItems.sort(sortByStringProperty('deviceID'));
+                nextEntity = orderBy(nextEntity, getSortFunctions(['deviceID']), ['ASC']);
             }
 
-            items = items.concat(newItems);
+            items = items.concat(nextEntity);
         });
         const filtered = this.filterItems(this.state.search, items);
+
+        items = orderBy(items, sorters, sortDirections);
 
         const disabledItems = new Set();
         filtered.forEach(item => {
@@ -199,6 +211,7 @@ export class AddMenu extends React.Component {
             <Container text className="add-menu">
                 <Header>Select Group Members</Header>
                 <Segment basic className="heading">
+                    <Checkbox checked={this.state.hideDisabled} onChange={this.hideDisabledItems} label='hide disabled items?' />
                     <Input transparent icon="search" placeholder="Search..." value={this.state.search} onChange={debounce(this.handleSearch, 500, { leading: true })} />
                     <Popup
                         open={isErrorVisible}
@@ -212,6 +225,10 @@ export class AddMenu extends React.Component {
                 <Segment.Group>
                     {filtered.map(item => {
                         const isDisabled = disabledItems.has(item.uuid);
+                        if (isDisabled && this.state.hideDisabled) {
+                            return null;
+                        }
+
                         const _selectItem = (event, { checked }) => this.selectItem(checked, item);
 
                         return (
