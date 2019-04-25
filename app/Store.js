@@ -18,7 +18,15 @@ const SynergyStore = () => {
     };
 
     const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
-    const store = createStore(combineReducers(appReducers), initialState, composeEnhancers(applyMiddleware(thunk, routerMiddleware(history), loggerMiddleware)));
+    const store = createStore(
+        combineReducers(appReducers),
+        initialState,
+        composeEnhancers(applyMiddleware(
+            thunk,
+            routerMiddleware(history),
+            loggerMiddleware
+        ))
+    );
 
     subscribeToStore(store);
 
