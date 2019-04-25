@@ -34,7 +34,6 @@ GroupAccordion.propTypes = {
     items: PropTypes.arrayOf(PropTypes.shape({
         uuid: PropTypes.string.isRequired,
         name: PropTypes.string,
-        type: PropTypes.oneOf(['group', 'device', 'channel']).isRequired,
     })).isRequired,
     handleTitleClick: PropTypes.func.isRequired,
     viewUsage: PropTypes.func,

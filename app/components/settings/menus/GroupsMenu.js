@@ -44,7 +44,10 @@ export class GroupsMenu extends React.Component {
         group.members.forEach(member => {
             const type = `${member.type}s`;
             const memberDetails = this.props.entities[type].get(member.uuid);
-            result[type].push(memberDetails);
+            result[type].push({
+                ...memberDetails,
+                uuid: member.uuid,
+            });
         });
         return result;
     };
@@ -80,13 +83,13 @@ export class GroupsMenu extends React.Component {
                                         {
                                             Object.entries(members).map(([entity, items], idx) =>
                                                 Boolean(items.length) &&
-                                                <GroupAccordion
-                                                    key={entity}
-                                                    index={idx}
-                                                    isActive={this.state.expandedSection[idx]}
-                                                    title={capitalize(entity)}
-                                                    items={items}
-                                                    handleTitleClick={this.handleTitleClick} />
+                                                    <GroupAccordion
+                                                        key={entity}
+                                                        index={idx}
+                                                        isActive={this.state.expandedSection[idx]}
+                                                        title={capitalize(entity)}
+                                                        items={items}
+                                                        handleTitleClick={this.handleTitleClick} />
                                             )
                                         }
                                     </Accordion>
