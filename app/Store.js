@@ -13,28 +13,8 @@ const SynergyStore = () => {
     const initialState = loadState();
 
     const appReducers = {
-        user: Reducers.user,
-        userID: Reducers.userID,
+        ...Reducers,
         routing: routerReducer,
-
-        isLoginModalOpen: Reducers.isLoginModalOpen,
-        isNewUserModalOpen: Reducers.isNewUserModalOpen,
-
-        isLoadingQuery: Reducers.isLoadingQuery,
-        currentRequest: Reducers.currentRequest,
-        entities: Reducers.entities,
-        errors: Reducers.errors,
-
-        settingsTab: Reducers.settingsTab,
-        activeGroup: Reducers.activeGroup,
-        activeDevice: Reducers.activeDevice,
-        activeChannel: Reducers.activeChannel,
-
-        editTab: Reducers.editTab,
-        showEditModal: Reducers.showEditModal,
-
-        cumulative: Reducers.cumulative,
-        streams: Reducers.streams,
     };
 
     const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
