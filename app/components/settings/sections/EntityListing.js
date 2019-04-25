@@ -68,10 +68,13 @@ export class EntityListing extends React.Component {
                             const isActive = this.props.activeItem === item.uuid;
                             return (
                                 <React.Fragment key={item.uuid}>
-                                    <Segment basic className='listing' onClick={_changeActiveItem} color={isActive ? 'olive' : null} inverted={isActive}>
+                                    <Segment basic className='listing' onClick={_changeActiveItem}>
                                         <span>
                                             <Icon name='power' color='grey' />
                                             {item.name || `Unnamed ${capitalize(this.props.entityType)}`}
+                                            {
+                                                isActive && <Icon name='star' color='green' />
+                                            }
                                         </span>
                                         <span>
                                             <Icon link name='tachometer alternate' onClick={this.props.viewUsage} />

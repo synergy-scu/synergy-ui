@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Modal, Tab } from 'semantic-ui-react';
 
 import EditPanes from './editor/EditPanes';
-import EditTabContainer from './editor/EditTabContainer';
+// import EditTabContainer from './editor/EditTabContainer';
 
 export class EntityModal extends React.Component {
     constructor(props) {
@@ -34,12 +34,12 @@ export class EntityModal extends React.Component {
                     <Tab
                         menu={{ secondary: true, pointing: true }}
                         panes={EditPanes.map(pane => {
-                            const ConnectedPane = EditTabContainer(pane.component);
+                            // const ConnectedPane = EditTabContainer(pane.component);
                             return {
                                 menuItem: pane.menuItem,
                                 render: () =>
                                     <Tab.Pane attached={false}>
-                                        <ConnectedPane />
+                                        {/* <ConnectedPane /> */}
                                     </Tab.Pane>,
                             };
                         })}

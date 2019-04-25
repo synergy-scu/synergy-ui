@@ -146,6 +146,6 @@ export const streamErrors = (state = new Map(), action) => {
             nextState.delete(action.payload.chartID);
             return nextState;
         default:
-            break;
+            return state;
     }
 };

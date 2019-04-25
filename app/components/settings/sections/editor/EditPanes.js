@@ -1,5 +1,5 @@
 import { EditEntity } from './EditEntity';
-import { EditNotifications } from './EditNotifications';
+// import { EditNotifications } from './EditNotifications';
 
 export default [
     {
@@ -9,7 +9,7 @@ export default [
     },
     {
         menuItem: 'Notifications',
-        component: EditNotifications,
+        // component: EditNotifications,
         entity: 'notifications',
     },
 ];

@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 
-import { EntityModal } from './EntityModal';
+// import { EntityModal } from './EntityModal';
 
 export const mapState = state => {
     return {
@@ -8,4 +8,4 @@ export const mapState = state => {
     };
 };
 
-export default connect(mapState)(EntityModal);
+// export default connect(mapState)(EntityModal);
