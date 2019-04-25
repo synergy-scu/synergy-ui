@@ -48,7 +48,7 @@ export class NewUserHandler extends React.Component {
     static propTypes = {
         isOpen: PropTypes.bool,
         onCreateUser: PropTypes.func.isRequired,
-        toggleModal: PropTypes.func.isRequired,
+        cancelNewUserModal: PropTypes.func.isRequired,
     };
 
     onFieldChange = (event, { field, value }) => {
@@ -143,7 +143,7 @@ export class NewUserHandler extends React.Component {
                 </Form>
             </Modal.Content>
             <Modal.Actions>
-                <Button content='Cancel' onClick={this.props.toggleModal} />
+                <Button content='Cancel' onClick={this.props.cancelNewUserModal} />
                 <Button primary
                     type='submit'
                     content='Create Account'

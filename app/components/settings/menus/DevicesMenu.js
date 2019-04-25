@@ -47,11 +47,6 @@ export class DevicesMenu extends React.Component {
 
         if (devices.size > 0) {
             activeDevice = devices.get(this.props.activeDevice);
-            this.props.entities.channels.forEach(channel => {
-                if (channel.deviceID === this.props.activeDevice) {
-                    activeDevice.channels.set(channel.key, channel);
-                }
-            });
         }
 
         return (
@@ -74,7 +69,12 @@ export class DevicesMenu extends React.Component {
                                         activeDevice &&
                                             <EntityListing
                                                 entityType="channel"
-                                                items={[...activeDevice.channels.values()]} />
+                                                items={[...activeDevice.channels.values()].map(channel => {
+                                                    return {
+                                                        ...this.props.entities.channels.get(channel),
+                                                        uuid: channel,
+                                                    };
+                                                })} />
                                     }
                                 </Segment>
                             </Segment.Group>

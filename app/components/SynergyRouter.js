@@ -5,8 +5,6 @@ import { Route, Switch, push as changePage } from 'react-router-dom';
 import ChartPaneContainer from './cards/ChartPaneContainer';
 import SettingsPaneContainer from './settings/SettingsPaneContainer';
 
-const blank = () => <div />;
-
 export const SynergyRouter = () =>
     <div id="router">
         <Switch>

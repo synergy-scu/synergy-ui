@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Form, Button, Checkbox, Modal } from 'semantic-ui-react';
 
-export const LoginFields = ({ email = '', password = '', saveSession = false }) => {
+export const LoginFields = ({ email = 'admin@synergy.com', password = 'wonderland', saveSession = false }) => {
     return {
         email,
         password,
@@ -33,9 +33,8 @@ export class LoginHandler extends React.Component {
     static propTypes = {
         isOpen: PropTypes.bool,
         onLogin: PropTypes.func.isRequired,
-        onNewUser: PropTypes.func.isRequired,
-        toggleModal: PropTypes.func.isRequired,
-    }
+        openNewUserModal: PropTypes.func.isRequired,
+    };
 
     onFieldChange = (event, { field, value }) => {
         this.setState({
@@ -76,7 +75,7 @@ export class LoginHandler extends React.Component {
 
     render = () =>
         <Modal
-            size='tiny'
+            size='mini'
             dimmer='blurring'
             open={this.props.isOpen}
             trigger={ <span style={{ display: 'none' }} /> }>
@@ -92,6 +91,7 @@ export class LoginHandler extends React.Component {
                     <Form.Input fluid
                         label='Password'
                         field='password'
+                        type='password'
                         onChange={this.onFieldChange}
                         value={this.state.fields.password}
                         error={this.state.errors.password} />
@@ -102,8 +102,7 @@ export class LoginHandler extends React.Component {
                 </Form>
             </Modal.Content>
             <Modal.Actions>
-                <Button content='Cancel' onClick={this.props.toggleModal} />
-                <Button content='Create New User' onClick={this.props.onNewUser} />
+                <Button content='Create New User' onClick={this.props.openNewUserModal} />
                 <Button primary
                     type='submit'
                     content='Login'

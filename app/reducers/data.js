@@ -1,5 +1,5 @@
 import Actions from '../actions';
-import { normalize, extractChannels } from '../api/normalize/normalize';
+import { normalize, extractGroupChannels } from '../api/normalize/normalize';
 import { fetchAllRequest, entityRequest, fetchRequest } from '../api/requests';
 import RequestStates from '../api/constants/RequestStates';
 
@@ -143,7 +143,7 @@ export const currentRequest = (state = fetchAllRequest({}), action) => {
     }
 };
 
-const defaultEntities = { groups: new Map(), devices: new Map(), channels: new Map() };
+const defaultEntities = { groups: new Map(), devices: new Map(), channels: new Map(), charts: new Map() };
 export const entities = (state = defaultEntities, action) => {
     switch (action.type) {
         case Actions.FETCH_ALL_SUCCESS: {
@@ -160,23 +160,22 @@ export const entities = (state = defaultEntities, action) => {
                     }
                     return state;
                 case 'groups':
-                    if (Array.isArray(action.payload.data.groups)) {
-                        action.payload.data.groups.forEach(group => {
-                            console.log(group);
-                            const normalizedEntity = normalize(group, action.payload.entityType);
-                            console.log(normalizedEntity);
-                            state.groups.set(normalizedEntity.key, normalizedEntity);
+                case 'charts':
+
+                    if (Array.isArray(action.payload.data[action.payload.entityType])) {
+                        action.payload.data[action.payload.entityType].forEach(parent => {
+                            const normalizedEntity = normalize(parent, action.payload.entityType);
+                            state[action.payload.entityType].set(normalizedEntity.key, normalizedEntity);
                         });
                     }
 
                     if (Array.isArray(action.payload.data.members)) {
                         action.payload.data.members.forEach(member => {
-                            const group = state.groups.get(member.groupID);
-                            group.members.push(normalize(member, 'groupling'));
-                            state.groups.set(group.key, group);
+                            const parent = state[action.payload.entityType].get(member[action.payload.entityType === 'groups' ? 'groupID' : 'chartID']);
+                            parent.members.push(normalize(member, action.payload.entityType === 'groups' ? 'groupling' : 'charling'));
+                            state[action.payload.entityType].set(parent.key, parent);
                         });
                     }
-                    console.log(state);
                     return { ...state };
                 default:
                     return state;
@@ -184,16 +183,36 @@ export const entities = (state = defaultEntities, action) => {
         }
         case Actions.FETCH_SUCCESS:
             return state;
+        case Actions.FETCH_ALL_FINISH:
         case Actions.EXTRACT_ALL_CHANNELS: {
+            const devices = new Map(state.devices);
+            state.devices.forEach(device => {
+                const channels = new Set(
+                    [...state.channels.values()]
+                        .filter(channel => channel.deviceID === device.deviceID)
+                        .map(channel => channel.channelID)
+                );
+                devices.set(device.deviceID, {
+                    ...device,
+                    channels,
+                });
+            });
+            state.devices = devices;
+
             const groups = new Map(state.groups);
             state.groups.forEach(group => {
                 groups.set(group.groupID, {
                     ...group,
-                    extracted: extractChannels(group, state),
+                    extracted: extractGroupChannels(group, {
+                        ...state,
+                        devices,
+                    }),
                 });
             });
+
             return {
                 ...state,
+                devices,
                 groups,
             };
         }
@@ -201,7 +220,7 @@ export const entities = (state = defaultEntities, action) => {
             action.payload.groups.forEach(group => {
                 state.groups.set(group.groupID, {
                     ...group,
-                    extracted: extractChannels(group, state),
+                    extracted: extractGroupChannels(group, state),
                 });
             });
             return { ...state };

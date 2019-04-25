@@ -2,6 +2,7 @@ import uuidv4 from 'uuid/v4';
 
 import Actions from './types';
 import { validResponse, invalidRespone } from '../api/requests';
+import AXIOS_TIMEOUT from '../api/constants/AxiosTimeout';
 
 export const createGroupStart = () => {
     return {
@@ -50,7 +51,7 @@ export const createGroup = ({ axios, name, members }) => dispatch => {
                 error: new Error('Unable to create group. Request timed out.'),
             }));
         }
-    }, 30 * 1000);
+    }, AXIOS_TIMEOUT);
 
     axios.post('group', {
         type: 'create',

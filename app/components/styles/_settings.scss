@@ -59,7 +59,7 @@
         .ui.transparent.input {
             border-bottom: 1px solid rgba(34,36,38,.15);
             padding: .25em;
-            margin-bottom: .5em;
+            margin-bottom: 0;
 
             &:focus-within {
                 border-bottom-color: #767676;

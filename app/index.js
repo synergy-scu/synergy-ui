@@ -1,3 +1,6 @@
+import 'map.prototype.tojson';
+import 'set.prototype.tojson';
+
 import React from 'react';
 import Axios from 'axios';
 import { render } from 'react-dom';
@@ -19,16 +22,18 @@ const instance = Axios.create({
     baseURL: '/api/',
     timeout: 30000,
     method: 'post',
+    transformResponse: [data => Object.values(JSON.parse(data))[0]],
 });
 
-store.dispatch(ActionCreators.fetchAll({ axios: instance }));
+// store.dispatch(ActionCreators.fetchAll({ axios: instance }));
+store.dispatch(ActionCreators.toggleLoginModal(true));
 
 render(
     <AxiosProvider instance={instance}>
         <Provider store={store}>
             <Router history={history}>
                 <React.Fragment>
-                    <UserHandlerContainer isOpen={false} />
+                    <UserHandlerContainer />
                     <Heading />
                     <ApplicationContainer history={history} />
                 </React.Fragment>

@@ -2,8 +2,7 @@ import uuidv4 from 'uuid/v4';
 
 import Actions from './types';
 import { capitalize } from '../api/utils';
-
-const FETCH_ALL_TIMEOUT = 30 * 1000; // 30 seconds
+import AXIOS_TIMEOUT from '../api/constants/AxiosTimeout';
 
 export const fetchAllNew = () => {
     return {
@@ -56,7 +55,7 @@ export const fetchAllFinish = ({ requestID }) => {
 };
 
 export const fetchAll = ({ axios }) => dispatch => {
-    const routes = ['group', 'device', 'channel'];
+    const routes = ['group', 'device', 'channel', 'chart'];
 
     const newFetchAll = fetchAllNew();
     const id = newFetchAll.payload.requestID;
@@ -73,22 +72,21 @@ export const fetchAll = ({ axios }) => dispatch => {
                 dispatch(fetchAllError({
                     requestID: id,
                     entityType,
-                    error: `${capitalize(entityType)} Query Timed Out`,
+                    error: `${capitalize(entityType)} query timed out`,
                 }));
             }
-        }, FETCH_ALL_TIMEOUT);
+        }, AXIOS_TIMEOUT);
 
         return axios.post(route, {})
-            .then(response =>
-                response.data
-                    ? response.data
-                    : Promise.reject(response)
-            ).then(data => {
+            .then(response => response.data
+                ? response.data
+                : Promise.reject(response))
+            .then(data => {
                 isResolved = true;
                 dispatch(fetchAllSuccess({
                     requestID: id,
                     entityType,
-                    data: data.data,
+                    data,
                 }));
             }).catch(error => {
                 isResolved = true;

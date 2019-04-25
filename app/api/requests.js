@@ -63,6 +63,7 @@ export const fetchAllRequest = ({
         groups: entityRequest({}),
         devices: entityRequest({}),
         channels: entityRequest({}),
+        charts: entityRequest({}),
     },
     phase = RequestStates.INITIAL,
     ...params

@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Axios from 'axios';
 
 import { NewUserHandler } from './NewUserHandler';
 import { LoginHandler } from './LoginHandler';
@@ -10,44 +9,43 @@ export class UserHandler extends React.Component {
         super(props);
 
         this.state = {
-            isLoginModal: (this.props.user === '' || this.props.user === 'unauthorized') && false,
-            isNewUserModal: false,
         };
     }
 
     static propTypes = {
-        user: PropTypes.string,
+        user: PropTypes.shape({
+            userID: PropTypes.number,
+            name: PropTypes.string,
+            email: PropTypes.string,
+        }).isRequired,
+        isLoginModalOpen: PropTypes.bool.isRequired,
+        isNewUserModalOpen: PropTypes.bool.isRequired,
         onLogin: PropTypes.func.isRequired,
         onCreateUser: PropTypes.func.isRequired,
+        toggleLoginModal: PropTypes.func.isRequired,
+        toggleNewUserModal: PropTypes.func.isRequired,
     };
 
-    onToggleLoginModal = () => this.setState({ isLoginModal: !this.state.isLoginModal });
-
-    onToggleNewUserModal = () => this.setState({ isNewUserModal: !this.state.isNewUserModal });
-
-    openNewUser = () => {
-        this.setState({ isLoginModal: false });
-        const self = this;
-        setTimeout(() => {
-            self.setState({ isNewUserModal: true });
-        }, 100);
+    openNewUserModal = () => {
+        this.props.toggleLoginModal(false);
+        this.props.toggleNewUserModal(true);
     };
 
-    onLogin = ({ email, password, saveSession }) => {
-        this.props.onLogin({ email, password, saveSession, axios: this.props.axios });
-    }
+    cancelNewUserModal = () => {
+        this.props.toggleNewUserModal(false);
+        this.props.toggleLoginModal(true);
+    };
 
     render = () =>
         <React.Fragment>
             <LoginHandler
-                isOpen={this.state.isLoginModal}
-                toggleModal={this.onToggleLoginModal}
-                onNewUser={this.openNewUser}
-                onLogin={this.onLogin} />
+                isOpen={this.props.isLoginModalOpen}
+                openNewUserModal={this.openNewUserModal}
+                onLogin={this.props.onLogin} />
             <NewUserHandler
-                isOpen={this.state.isNewUserModal}
-                toggleModal={this.onToggleNewUserModal}
-                onCreateUser={this.onCreateUser} />
+                isOpen={this.props.isNewUserModalOpen}
+                cancelNewUserModal={this.cancelNewUserModal}
+                onCreateUser={this.props.onCreateUser} />
         </React.Fragment>
 
 }

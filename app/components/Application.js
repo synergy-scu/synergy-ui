@@ -13,7 +13,11 @@ export class Application extends React.Component {
     }
 
     static propTypes = {
-        user: PropTypes.string,
+        user: PropTypes.shape({
+            userID: PropTypes.number,
+            name: PropTypes.string,
+            email: PropTypes.string,
+        }).isRequired,
         history: PropTypes.object,
     };
 

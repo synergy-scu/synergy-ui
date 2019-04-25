@@ -22,5 +22,4 @@ Navigation.propTypes = {
         icon: PropTypes.string,
         path: PropTypes.string,
     })),
-    user: PropTypes.string,
 };

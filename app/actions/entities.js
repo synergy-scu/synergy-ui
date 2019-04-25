@@ -1,10 +1,11 @@
 import Actions from './types';
 
-export const extractChannels = groups => {
+export const extractChannels = (groups, devices) => {
     return {
         type: Actions.EXTRACT_CHANNELS,
         payload: {
             groups,
+            devices,
         },
     };
 };

@@ -7,13 +7,19 @@ import ActionCreators from '../../actions';
 export const mapState = state => {
     return {
         user: state.user,
+        userID: state.userID,
+        isLoginModalOpen: state.isLoginModalOpen,
+        isNewUserModalOpen: state.isNewUserModalOpen,
     };
 };
 
 export const mapDispatch = dispatch => {
     return {
-        onLogin: (email, password, saveSession, axios) => dispatch(ActionCreators.userLogin({ email, password, saveSession, axios })),
-        onCreateUser: (name, email, password, familySize, axios) => dispatch(ActionCreators.createUser({ name, email, password, familySize, axios })),
+        toggleLoginModal: (isOpen = null) => dispatch(ActionCreators.toggleLoginModal(isOpen)),
+        toggleNewUserModal: (isOpen = null) => dispatch(ActionCreators.toggleNewUserModal(isOpen)),
+
+        onLogin: loginParams => dispatch(ActionCreators.userLogin(loginParams)),
+        onCreateUser: newUserParams => dispatch(ActionCreators.createUser(newUserParams)),
     };
 };
 
@@ -22,9 +28,10 @@ export const mergeProps = (stateProps, dispatchProps, ownProps) => {
         ...stateProps,
         ...dispatchProps,
         ...ownProps,
+
         // Axios prop passed in from withAxios() HOC
-        onLogin: (email, password, saveSession) => dispatchProps.onLogin(email, password, saveSession, ownProps.axios),
-        onCreateUser: (name, email, password, familySize) => dispatchProps.onCreateUser(name, email, password, familySize, ownProps.axios),
+        onLogin: ({ email, password, saveSession }) => dispatchProps.onLogin({ email, password, saveSession, axios: ownProps.axios }),
+        onCreateUser: ({ name, email, password, familySize }) => dispatchProps.onCreateUser({ name, email, password, familySize, axios: ownProps.axios }),
     };
 };
 

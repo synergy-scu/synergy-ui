@@ -1,90 +1,111 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { } from 'semantic-ui-react';
-import uuidv4 from 'uuid/v4';
+import { Button, Sidebar, Menu, Icon } from 'semantic-ui-react';
 import memoize from 'memoize-one';
+import { isEqual } from 'lodash';
 
-import { ResponsiveLine } from '@nivo/line';
-import { timeFormat } from 'd3-time-format';
-import { last, maxBy, minBy, isEqual } from 'lodash';
+import { ChartTypes } from '../../api/constants/ChartTypes';
 
+import createChart from './charts/ChartContainer';
+import { LineChart } from './charts/LineChart';
+import { PieChart } from './charts/PieChart';
+import { BarChart } from './charts/BarChart';
+import { BurstChart } from './charts/BurstChart';
+import { NoChart } from './charts/NoChart';
 
 export class ChartPane extends React.Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            chartID: uuidv4(),
-            chartType: 'line',
-            usageType: 'all',
+            isMenuVisible: true,
+            selectedChart: '',
+            selectedType: ChartTypes.NONE,
         };
-        this.formatTime = timeFormat('%I:%M% %p');
     }
 
     static propTypes = {
-        cumulative: PropTypes.arrayOf(PropTypes.shape({
-            x: PropTypes.number.isRequired,
-            y: PropTypes.number.isRequired,
-        })).isRequired,
-        fetchUsage: PropTypes.func.isRequired,
-    }
+        entities: PropTypes.shape({
+            charts: PropTypes.instanceOf(Map).isRequired,
+        }),
+    };
 
-    componentDidMount() {
-        this.next();
-        this.timer = setInterval(this.next, 1000);
-    }
-
-    componentWillUnmount() {
-        clearInterval(this.timer);
-    }
-
-    next = (limit = 1) => {
-        this.props.fetchUsage({
-            chartID: this.state.chartID,
-            usageType: this.state.usageType,
-            chartType: this.state.chartType,
-            timeRange: {
-                after: new Date().getTime() - 1000 - 7 * 60 * 60 * 1000,
-            },
-            limit,
+    toggleSidebar = () => {
+        this.setState({
+            isMenuVisible: !this.state.isMenuVisible,
         });
-    }
+    };
 
-    getPoints = memoize(points => points, isEqual);
+    selectChart = ({ chartID, chartType }) => {
+        this.setState({
+            isMenuVisible: false,
+            selectedChart: chartID,
+            selectedType: chartType,
+        });
+    };
+
+    chartSwitcher = memoize((type, chartID) => {
+        switch (type) {
+            case ChartTypes.LINE:
+                return LineChart;
+            case ChartTypes.PIE:
+                return PieChart;
+            case ChartTypes.BAR:
+                return BarChart;
+            case ChartTypes.BURST:
+                return BurstChart;
+            default:
+                return NoChart;
+        }
+    }, isEqual);
 
     render() {
-        const points = this.getPoints(this.props.cumulative || []);
-        const maxY = points.length ? maxBy(points, 'y').y + 1 : 0;
-        const minY = points.length ? minBy(points, 'y').y - 1 : 0;
-        const currTime = new Date().getTime();
+
+        const Chart = createChart(this.chartSwitcher(this.state.selectedType, this.state.selectedChart));
 
         return (
-            <ResponsiveLine
-                data={[{ id: 'Cumulative', data: points }]}
-                margin={{ top: 20, right: 20, bottom: 60, left: 60 }}
-                xScale={{ type: 'time', format: '%Q' }}
-                yScale={{ type: 'linear', min: minY, max: maxY }}
-                enableGridX={false}
-                enableDots={false}
-                curve='monotoneX'
-                animate={false}
-                isInteractive={false}
-                lineWidth={5}
-                axisBottom={{
-                    format: '%I:%M% %p',
-                    legend: `${this.formatTime(currTime)}`,
-                    legendOffset: 20,
-                    legendPosition: 'end',
-                    tickValues: 0,
-                }}
-                axisLeft={{
-                    legend: 'kw/h',
-                    legendOffset: -40,
-                    legendPosition: 'middle',
-                }}
-                theme={{
-                    grid: { line: { stroke: '#ddd', strokeDasharray: '1 2' } },
-                }} />
+            <Sidebar.Pushable>
+                <Sidebar vertical
+                    as={Menu}
+                    animation='overlay'
+                    direction='left'
+                    visible={this.state.isMenuVisible}>
+                    <Menu.Item header style={{ display: 'flex', justifyContent: 'space-between', alignitems: 'center' }}>
+                        <span>Charts</span>
+                        <Icon link name='close' onClick={this.toggleSidebar} />
+                    </Menu.Item>
+                    {
+                        [...this.props.entities.charts.values()].map(chart => {
+                            let icon;
+                            if (chart.chartType === ChartTypes.LINE) {
+                                icon = 'chart line';
+                            } else if (chart.chartType === ChartTypes.BAR) {
+                                icon = 'chart bar';
+                            } else if (chart.chartType === ChartTypes.PIE) {
+                                icon = 'chart pie';
+                            } else if (chart.chartType === ChartTypes.BURST) {
+                                icon = 'sun';
+                            } else {
+                                icon = 'ban';
+                            }
+
+                            const selectChart = () => this.selectChart(chart);
+                            return (
+                                <Menu.Item key={chart.key} active={this.state.selected === chart.key} as='a' onClick={selectChart}>
+                                    {chart.name || 'Unnamed Chart'}
+                                    <Icon name={icon} />
+                                </Menu.Item>
+                            );
+                        })
+                    }
+                </Sidebar>
+
+                <Sidebar.Pusher>
+                    <Button icon='angle right' onClick={this.toggleSidebar} />
+                    <Chart chartID={this.state.selectedChart} />
+                </Sidebar.Pusher>
+            </Sidebar.Pushable>
+
         );
     }
 }

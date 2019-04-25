@@ -1,3 +1,31 @@
+import { get } from 'lodash';
+import { ChartTypes, UsageTypes } from '../constants/ChartTypes';
+
+export const normalizeChart = ({ name, chartID, chartType, usageType, options = {}, members, all, created, updated }) => {
+    return {
+        key: chartID,
+        name,
+        chartID,
+        chartType: get(ChartTypes, chartType.toUpperCase(), ChartTypes.NONE),
+        usageType: get(UsageTypes, usageType.toUpperCase(), UsageTypes.NONE),
+        options,
+        count: members,
+        members: [],
+        all: all === 1,
+        created: new Date(created),
+        updated: new Date(updated),
+    };
+};
+
+export const normalizeChartMember = ({ chartID, uuid, type, added }) => {
+    return {
+        chartID,
+        uuid,
+        type,
+        added: new Date(added),
+    };
+};
+
 export const normalizeGroup = ({ name, groupID, members, created, updated }) => {
     return {
         key: groupID,
@@ -26,7 +54,7 @@ export const normalizeDevice = ({ name, deviceID, channels, created, updated }) 
         name,
         deviceID,
         count: channels,
-        channels: new Map(),
+        channels: new Set(),
         created: new Date(created),
         updated: new Date(updated),
     };
@@ -43,13 +71,13 @@ export const normalizeChannel = ({ name, channelID, deviceID, created, updated }
     };
 };
 
-export const extractChannels = (group, entities, extractedChannels = new Set()) => {
+export const extractGroupChannels = (group, entities, extractedChannels = new Set()) => {
     group.members.forEach(member => {
         switch (member.type) {
             case 'group': {
                 const nextGroup = entities.groups.get(member.uuid);
                 if (nextGroup) {
-                    extractChannels(nextGroup, entities, extractedChannels);
+                    extractGroupChannels(nextGroup, entities, extractedChannels);
                 }
                 break;
             }
@@ -82,6 +110,10 @@ export const normalize = (data, entityType) => {
             return normalizeGroup(data);
         case 'groupling':
             return normalizeGroupMember(data);
+        case 'charts':
+            return normalizeChart(data);
+        case 'charling':
+            return normalizeChartMember(data);
         case 'devices':
             return normalizeDevice(data);
         case 'channels':

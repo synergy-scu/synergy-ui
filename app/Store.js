@@ -3,9 +3,10 @@ import { routerReducer, routerMiddleware } from 'react-router-redux';
 import thunk from 'redux-thunk';
 import createHistory from 'history/createHashHistory';
 
-import { loadState, saveState } from './localStorage';
+import { loadState } from './localStorage';
 import { default as Reducers } from './reducers';
 import loggerMiddleware from './middleware/loggerMiddleware';
+import { subscribeToStore } from './api/subscribeToStore';
 
 const SynergyStore = () => {
     const history = createHistory();
@@ -13,7 +14,11 @@ const SynergyStore = () => {
 
     const appReducers = {
         user: Reducers.user,
+        userID: Reducers.userID,
         routing: routerReducer,
+
+        isLoginModalOpen: Reducers.isLoginModalOpen,
+        isNewUserModalOpen: Reducers.isNewUserModalOpen,
 
         isLoadingQuery: Reducers.isLoadingQuery,
         currentRequest: Reducers.currentRequest,
@@ -29,14 +34,18 @@ const SynergyStore = () => {
         showEditModal: Reducers.showEditModal,
 
         cumulative: Reducers.cumulative,
+        streams: Reducers.streams,
     };
 
     const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
     const store = createStore(combineReducers(appReducers), initialState, composeEnhancers(applyMiddleware(thunk, routerMiddleware(history), loggerMiddleware)));
 
+    subscribeToStore(store);
+
     return {
         history,
         store,
+        dispatch: store.dispatch,
     };
 };
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Segment, Input, Checkbox, Button, Header, Popup, Container } from 'semantic-ui-react';
+import { Segment, Input, Checkbox, Button, Header, Popup, Grid, Menu, Icon } from 'semantic-ui-react';
 import { escapeRegExp, isEqual, filter, debounce, orderBy } from 'lodash';
 import memoize from 'memoize-one';
 
@@ -21,6 +21,7 @@ export class AddMenu extends React.Component {
             selectionError: false,
             selectionValidationError: false,
             isErrorVisible: false,
+            filterBy: new Set(),
         };
     }
 
@@ -110,6 +111,19 @@ export class AddMenu extends React.Component {
         });
     };
 
+    changeFilter = (event, { name }) => {
+        const types = this.state.filterBy;
+        if (types.has(name)) {
+            types.delete(name);
+        } else {
+            types.add(name);
+        }
+
+        this.setState({
+            filterBy: types,
+        });
+    }
+
     selectItem = (checked, item) => {
         this.setState({ isErrorVisible: false });
 
@@ -144,21 +158,26 @@ export class AddMenu extends React.Component {
         }
     };
 
-    isMatch = value => result => {
+    isMatch = (types, value) => result => {
         const re = new RegExp(escapeRegExp(value), 'i');
-        if (value.length) {
+        if (value.length && types.size) {
+            return re.test(result.name) && Boolean(result.name) && types.has(result.type);
+        } else if (value.length) {
             return re.test(result.name) && Boolean(result.name);
         }
-        return re.test(result.name);
+        return re.test(result.name) ;
     };
 
-    filterItems = memoize((value, items) => filter(items, this.isMatch(value)), isEqual);
+    filterItems = memoize((types, value, items) => {
+        const sorters = getSortFunctions(['name', 'created']);
+        const sortDirections = ['ASC', 'DESC'];
+        const filtered = filter(items, this.isMatch(types, value));
+        return orderBy(filtered, sorters, sortDirections);
+    }, isEqual);
 
     render() {
         let items = [];
         const entities = ['group', 'device', 'channel'];
-        const sorters = getSortFunctions(['name', 'created']);
-        const sortDirections = ['ASC', 'DESC'];
 
         entities.forEach(entity => {
             const selector = `${entity}s`;
@@ -176,9 +195,7 @@ export class AddMenu extends React.Component {
 
             items = items.concat(nextEntity);
         });
-        const filtered = this.filterItems(this.state.search, items);
-
-        items = orderBy(items, sorters, sortDirections);
+        const filtered = this.filterItems(this.state.filterBy, this.state.search, items);
 
         const disabledItems = new Set();
         filtered.forEach(item => {
@@ -208,38 +225,75 @@ export class AddMenu extends React.Component {
         }
 
         return (
-            <Container text className="add-menu">
-                <Header>Select Group Members</Header>
-                <Segment basic className="heading">
-                    <Checkbox checked={this.state.hideDisabled} onChange={this.hideDisabledItems} label='hide disabled items?' />
-                    <Input transparent icon="search" placeholder="Search..." value={this.state.search} onChange={debounce(this.handleSearch, 500, { leading: true })} />
-                    <Popup
-                        open={isErrorVisible}
-                        disabled={!isErrorVisible}
-                        trigger={<Input placeholder="Group Name" value={this.state.name} error={this.state.nameError} onChange={this.onNameChange} action={<Button content="Create Group" positive={!isErrorVisible} negative={isErrorVisible} onClick={this.createGroup} />} />}
-                        content={errorContent.map(item =>
-                            <p key={item.type}>{item.message}</p>
-                        )}
-                    />
-                </Segment>
-                <Segment.Group>
-                    {filtered.map(item => {
-                        const isDisabled = disabledItems.has(item.uuid);
-                        if (isDisabled && this.state.hideDisabled) {
-                            return null;
-                        }
+            <Grid>
+                <Grid.Column width={5} className='squarify'>
+                    <Menu vertical fluid>
+                        <Menu.Item>
+                            <Input transparent
+                                icon="search"
+                                placeholder="Search..."
+                                value={this.state.search}
+                                onChange={debounce(this.handleSearch, 500, { leading: true })}
+                                style={{ marginBottom: 0, borderBottom: 'none' }} />
+                        </Menu.Item>
+                        <Menu.Item>
+                            <Checkbox style={{ float: 'right' }} checked={this.state.hideDisabled} onChange={this.hideDisabledItems} />
+                            Hide Disabled Items
+                        </Menu.Item>
+                        <Menu.Item>
+                            Filter By
+                            <Menu.Menu>
+                                <Menu.Item name='group' active={this.state.filterBy.has('group')} onClick={this.changeFilter}>
+                                    {this.state.filterBy.has('group') && <Icon name='checkmark' />}
+                                    Group
+                                </Menu.Item>
+                                <Menu.Item name='device' active={this.state.filterBy.has('device')} onClick={this.changeFilter}>
+                                    {this.state.filterBy.has('device') && <Icon name='checkmark' />}
+                                    Device
+                                </Menu.Item>
+                                <Menu.Item name='channel' active={this.state.filterBy.has('channel')} onClick={this.changeFilter}>
+                                    {this.state.filterBy.has('channel') && <Icon name='checkmark' />}
+                                    Channel
+                                </Menu.Item>
+                            </Menu.Menu>
+                        </Menu.Item>
+                    </Menu>
+                </Grid.Column>
+                <Grid.Column width={11} className='squarify'>
+                    <Segment className="add-menu">
+                        <Header>Select Group Members</Header>
+                        <Segment basic className="heading">
+                            <Input placeholder="Group Name" value={this.state.name} error={this.state.nameError} onChange={this.onNameChange} />
+                            <Popup
+                                open={isErrorVisible}
+                                disabled={!isErrorVisible}
+                                trigger={<Button content="Create Group" positive={!isErrorVisible} negative={isErrorVisible} onClick={this.createGroup} />}
+                                content={errorContent.map(item =>
+                                    <p key={item.type}>{item.message}</p>
+                                )}
+                            />
+                        </Segment>
+                        <Segment.Group>
+                            {filtered.map(item => {
+                                const isDisabled = disabledItems.has(item.uuid);
+                                if (isDisabled && this.state.hideDisabled) {
+                                    return null;
+                                }
 
-                        const _selectItem = (event, { checked }) => this.selectItem(checked, item);
+                                const _selectItem = (event, { checked }) => this.selectItem(checked, item);
 
-                        return (
-                            <Segment key={item.uuid} disabled={isDisabled} className="element">
-                                <span>{item.name ? item.name : `Unnamed ${capitalize(item.type)}`}<span className='secondary'>{item.type}</span></span>
-                                <Checkbox toggle disabled={isDisabled} checked={this.state.selection.has(item.uuid)} onChange={_selectItem} />
-                            </Segment>
-                        );
-                    })}
-                </Segment.Group>
-            </Container>
+                                return (
+                                    <Segment key={item.uuid} disabled={isDisabled} className="element">
+                                        <span>{item.name ? item.name : `Unnamed ${capitalize(item.type)}`}<span className='secondary'>{item.type}</span></span>
+                                        <Checkbox toggle disabled={isDisabled} checked={this.state.selection.has(item.uuid)} onChange={_selectItem} />
+                                    </Segment>
+                                );
+                            })}
+                        </Segment.Group>
+                        <Button content="Create Group" positive={!isErrorVisible} negative={isErrorVisible} onClick={this.createGroup} />
+                    </Segment>
+                </Grid.Column>
+            </Grid>
         );
     }
 }
