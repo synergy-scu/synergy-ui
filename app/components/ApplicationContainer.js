@@ -9,4 +9,4 @@ export const mapState = state => {
     };
 };
 
-export default connect(mapState)(withRouter(Application));
+export default withRouter(connect(mapState)(Application));
