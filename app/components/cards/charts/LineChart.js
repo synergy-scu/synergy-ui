@@ -93,14 +93,15 @@ export class LineChart extends React.Component {
 
         return (
             <Grid columns={2}>
-                <Grid.Column width={2}>
-                    <Button.Group vertical>
-                        <Button content='Stream' onClick={this.props.fetchUsage} disabled={stream.connected} />
-                        <Button content='Disconnect' onClick={this.props.disconnect} disabled={!stream.connected} />
+                <Grid.Column width={2} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                    <Button.Group>
+                        <Button icon='play' onClick={this.props.fetchUsage} disabled={stream.connected} />
+                        <Button icon='stop' onClick={this.props.disconnect} disabled={!stream.connected} />
                     </Button.Group>
-                    <Statistic horizontal size='mini' label='kWh' value={stripLongDecimal(kWhs)} />
+                    <Statistic size='mini' label='kWh' value={stripLongDecimal(kWhs)} />
                     {
-                        this.props.user.cost > 0 && <Statistic horizontal size='mini' label='USD' value={`$${cost}`} />
+                        this.props.user.cost && this.props.user.cost > 0 &&
+                            <Statistic size='mini' label='USD' value={cost} style={{ margin: 0 }} />
                     }
                 </Grid.Column>
                 <Grid.Column width={14}>
