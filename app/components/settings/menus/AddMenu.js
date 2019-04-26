@@ -1,8 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Segment, Input, Checkbox, Button, Header, Popup, Grid, Menu, Icon } from 'semantic-ui-react';
-import { escapeRegExp, isEqual, filter, debounce, orderBy } from 'lodash';
+import { escapeRegExp, filter, debounce, orderBy } from 'lodash';
 import memoize from 'memoize-one';
+import { isDeepStrictEqual } from 'util';
 
 import { capitalize } from '../../../api/utils';
 import { getSortFunctions } from '../../../api/sort';
@@ -19,11 +20,14 @@ export class AddMenu extends React.Component {
             selectedGroups: new Map(),
             selectedDevices: new Map(),
             selectionError: false,
-            selectionValidationError: false,
             isErrorVisible: false,
             filterBy: new Set(),
         };
     }
+
+    static defaultProps = {
+        groupType: 'group',
+    };
 
     static propTypes = {
         entities: PropTypes.shape({
@@ -31,6 +35,7 @@ export class AddMenu extends React.Component {
             devices: PropTypes.instanceOf(Map).isRequired,
             channels: PropTypes.instanceOf(Map).isRequired,
         }).isRequired,
+        groupType: PropTypes.string.isRequired,
     };
 
     reset = () => {
@@ -42,7 +47,6 @@ export class AddMenu extends React.Component {
             selectedGroups: new Map(),
             selectedDevices: new Map(),
             selectionError: false,
-            selectionValidationError: false,
             isErrorVisible: false,
             hideDisabled: false,
         });
@@ -54,11 +58,10 @@ export class AddMenu extends React.Component {
         this.setState({
             nameError: false,
             selectionError: false,
-            selectionValidationError: false,
             isErrorVisible: false,
         });
 
-        if (this.state.name.length <= 3) {
+        if (this.state.name.length < 3) {
             this.setState({ nameError: true });
             valid = false;
         }
@@ -71,9 +74,6 @@ export class AddMenu extends React.Component {
 
         if (this.state.selection.size === 0) {
             this.setState({ selectionError: true });
-            valid = false;
-        } else if (this.state.selection.size === 1 && this.state.selectedGroups.size === 1) {
-            this.setState({ selectionValidationError: true });
             valid = false;
         }
 
@@ -120,7 +120,7 @@ export class AddMenu extends React.Component {
         }
 
         this.setState({
-            filterBy: types,
+            filterBy: new Set(types),
         });
     }
 
@@ -165,19 +165,24 @@ export class AddMenu extends React.Component {
         } else if (value.length) {
             return re.test(result.name) && Boolean(result.name);
         }
-        return re.test(result.name) ;
+        return re.test(result.name);
     };
 
     filterItems = memoize((types, value, items) => {
-        const sorters = getSortFunctions(['name', 'created']);
+        const sortFunctions = getSortFunctions(['name', 'created']);
         const sortDirections = ['ASC', 'DESC'];
-        const filtered = filter(items, this.isMatch(types, value));
-        return orderBy(filtered, sorters, sortDirections);
-    }, isEqual);
+
+        let filtered = filter(items, this.isMatch(types, value));
+        if (types.size) {
+            filtered = filter(filtered, item => types.has(item.type));
+        }
+        return orderBy(filtered, sortFunctions, sortDirections);
+    }, isDeepStrictEqual);
 
     render() {
         let items = [];
         const entities = ['group', 'device', 'channel'];
+        const caps = capitalize(this.props.groupType);
 
         entities.forEach(entity => {
             const selector = `${entity}s`;
@@ -195,6 +200,7 @@ export class AddMenu extends React.Component {
 
             items = items.concat(nextEntity);
         });
+
         const filtered = this.filterItems(this.state.filterBy, this.state.search, items);
 
         const disabledItems = new Set();
@@ -204,24 +210,21 @@ export class AddMenu extends React.Component {
                     disabledItems.add(item.uuid);
                 }
             });
-            this.state.selectedGroups.forEach(channels => {
-                if (channels.has(item.uuid)) {
+            this.state.selectedGroups.forEach(member => {
+                if (member.has(item.uuid)) {
                     disabledItems.add(item.uuid);
                 }
             });
         });
 
-        const isError = this.state.nameError || this.state.selectionError || this.state.selectionValidationError;
+        const isError = this.state.nameError || this.state.selectionError;
         const isErrorVisible = isError && this.state.isErrorVisible;
         const errorContent = [];
         if (this.state.nameError) {
-            errorContent.push({ type: 'name', message: 'Group names must be at least 3 characters long and contain no special characters' });
+            errorContent.push({ type: 'name', message: `${caps} names must be at least 3 characters long and contain no special characters` });
         }
         if (this.state.selectionError) {
-            errorContent.push({ type: 'selection', message: 'You must select at least one group member. Select group members below' });
-        }
-        if (this.state.selectionValidationError) {
-            errorContent.push({ type: 'validation', message: 'The sole member of a group cannot be another group' });
+            errorContent.push({ type: 'selection', message: `You must select at least one ${this.props.groupType} member. Select ${this.props.groupType} members below` });
         }
 
         return (
@@ -261,13 +264,13 @@ export class AddMenu extends React.Component {
                 </Grid.Column>
                 <Grid.Column width={11} className='squarify'>
                     <Segment className="add-menu">
-                        <Header>Select Group Members</Header>
+                        <Header content={`Select ${caps} Members`} />
                         <Segment basic className="heading">
-                            <Input placeholder="Group Name" value={this.state.name} error={this.state.nameError} onChange={this.onNameChange} />
+                            <Input placeholder={`${caps} Name`} value={this.state.name} error={this.state.nameError} onChange={this.onNameChange} />
                             <Popup
                                 open={isErrorVisible}
                                 disabled={!isErrorVisible}
-                                trigger={<Button content="Create Group" positive={!isErrorVisible} negative={isErrorVisible} onClick={this.createGroup} />}
+                                trigger={<Button content={`Create ${caps}`} positive={!isErrorVisible} negative={isErrorVisible} onClick={this.createGroup} />}
                                 content={errorContent.map(item =>
                                     <p key={item.type}>{item.message}</p>
                                 )}
@@ -290,7 +293,7 @@ export class AddMenu extends React.Component {
                                 );
                             })}
                         </Segment.Group>
-                        <Button content="Create Group" positive={!isErrorVisible} negative={isErrorVisible} onClick={this.createGroup} />
+                        <Button content={`Create ${caps}`} fluid positive={!isErrorVisible} negative={isErrorVisible} onClick={this.createGroup} />
                     </Segment>
                 </Grid.Column>
             </Grid>
