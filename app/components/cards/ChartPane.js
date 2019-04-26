@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Button, Sidebar, Menu, Icon } from 'semantic-ui-react';
+import { Button, Sidebar, Menu, Icon, Tab } from 'semantic-ui-react';
 import memoize from 'memoize-one';
 import { isEqual } from 'lodash';
 
@@ -12,13 +12,15 @@ import { PieChart } from './charts/PieChart';
 import { BarChart } from './charts/BarChart';
 import { BurstChart } from './charts/BurstChart';
 import { NoChart } from './charts/NoChart';
+import TabPanes from './TabPanes';
+import { ChartSidebar } from './ChartSidebar';
 
 export class ChartPane extends React.Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            isMenuVisible: true,
+            isMenuVisible: false,
             selectedChart: '',
             selectedType: ChartTypes.NONE,
         };
@@ -27,7 +29,9 @@ export class ChartPane extends React.Component {
     static propTypes = {
         entities: PropTypes.shape({
             charts: PropTypes.instanceOf(Map).isRequired,
-        }),
+        }).isRequired,
+        chartsTab: PropTypes.number.isRequired,
+        changeTab: PropTypes.func.isRequired,
     };
 
     toggleSidebar = () => {
@@ -44,7 +48,7 @@ export class ChartPane extends React.Component {
         });
     };
 
-    chartSwitcher = memoize((type, chartID) => {
+    chartSwitcher = memoize(type => {
         switch (type) {
             case ChartTypes.LINE:
                 return LineChart;
@@ -59,53 +63,47 @@ export class ChartPane extends React.Component {
         }
     }, isEqual);
 
+    onTabChange = (event, { activeIndex }) => {
+        if (activeIndex === 0) {
+            this.toggleSidebar();
+        } else {
+            this.props.changeTab(activeIndex);
+        }
+    };
+
     render() {
 
         const Chart = createChart(this.chartSwitcher(this.state.selectedType, this.state.selectedChart));
 
         return (
             <Sidebar.Pushable>
-                <Sidebar vertical
-                    as={Menu}
-                    animation='overlay'
-                    direction='left'
-                    visible={this.state.isMenuVisible}>
-                    <Menu.Item header style={{ display: 'flex', justifyContent: 'space-between', alignitems: 'center' }}>
-                        <span>Charts</span>
-                        <Icon link name='close' onClick={this.toggleSidebar} />
-                    </Menu.Item>
-                    {
-                        [...this.props.entities.charts.values()].map(chart => {
-                            let icon;
-                            if (chart.chartType === ChartTypes.LINE) {
-                                icon = 'chart line';
-                            } else if (chart.chartType === ChartTypes.BAR) {
-                                icon = 'chart bar';
-                            } else if (chart.chartType === ChartTypes.PIE) {
-                                icon = 'chart pie';
-                            } else if (chart.chartType === ChartTypes.BURST) {
-                                icon = 'sun';
-                            } else {
-                                icon = 'ban';
-                            }
+                <ChartSidebar
+                    isMenuVisible={this.state.isMenuVisible}
+                    charts={[...this.props.entities.charts.values()]}
+                    toggleSidebar={this.toggleSidebar}
+                    selectChart={this.selectChart}
+                    selected={this.state.selectedChart} />
 
-                            const selectChart = () => this.selectChart(chart);
-                            return (
-                                <Menu.Item key={chart.key} active={this.state.selected === chart.key} as='a' onClick={selectChart}>
-                                    {chart.name || 'Unnamed Chart'}
-                                    <Icon name={icon} />
-                                </Menu.Item>
-                            );
-                        })
-                    }
-                </Sidebar>
-
-                <Sidebar.Pusher>
-                    <Button icon='angle right' onClick={this.toggleSidebar} />
-                    <Chart chartID={this.state.selectedChart} />
+                <Sidebar.Pusher id='charts'>
+                    <Tab
+                        menu={{ secondary: true, pointing: true }}
+                        panes={
+                            TabPanes(Chart).map(pane => {
+                                const Component = pane.component;
+                                return {
+                                    key: pane.tab,
+                                    menuItem: pane.menuItem,
+                                    render: () =>
+                                        <Tab.Pane attached={false}>
+                                            <Component chartID={this.state.selectedChart} groupType='chart' />
+                                        </Tab.Pane>,
+                                };
+                            })
+                        }
+                        activeIndex={this.props.chartsTab}
+                        onTabChange={this.onTabChange} />
                 </Sidebar.Pusher>
             </Sidebar.Pushable>
-
         );
     }
 }

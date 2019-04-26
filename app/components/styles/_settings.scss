@@ -1,94 +1,95 @@
 #settings {
-    .ui.menu {
-        .ui.category.search {
-            input {
-                border: none;
+    padding: 0.25em 1em;
+}
+
+.ui.menu {
+    .ui.category.search {
+        input {
+            border: none;
+        }
+    }
+}
+
+.squarify {
+    padding: .25rem;
+    overflow-y: scroll;
+
+    .ui.transparent.input {
+        border-bottom: 1px solid rgba(34, 36, 38, 0.15);
+        padding: .25em;
+        margin-bottom: .5em;
+
+        &:focus-within {
+            border-bottom-color: #767676;
+        }
+    }
+}
+
+.entity-listing {
+    height: 100%;
+    overflow-y: auto;
+
+    .listing {
+        display: flex;
+        justify-content: space-between;
+        margin: 0;
+        padding: 1em 0;
+
+        span {
+            i:first-of-type {
+                margin-right: .5rem;
             }
         }
     }
 
-    .squarify {
-        padding: .25rem;
-        overflow-y: scroll;
+    .ui.divider {
+        margin: 0 auto;
+        width: 95%;
+    }
+}
 
-        .ui.transparent.input {
-            border-bottom: 1px solid rgba(34,36,38,.15);
-            padding: .25em;
-            margin-bottom: .5em;
+.add-menu {
+    .element,
+    .heading {
+        display: flex;
+        justify-content: space-between;
+    }
 
-            &:focus-within {
-                border-bottom-color: #767676;
-            }
+    .heading {
+        padding: 0;
+    }
+
+    .ui.transparent.input {
+        border-bottom: 1px solid rgba(34,36,38,.15);
+        padding: .25em;
+        margin-bottom: 0;
+
+        &:focus-within {
+            border-bottom-color: #767676;
         }
     }
 
-    .entity-listing {
+    .ui.segments {
         height: 100%;
         overflow-y: auto;
 
+        .secondary {
+            color: #9B9999;
+            margin-left: 0.75em;
+            font-size: 0.9em;
+        }
+    }
+}
+
+.ui.accordion {
+    .title {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .entity-listing {
         .listing {
-            display: flex;
-            justify-content: space-between;
-            margin: 0;
-            padding: 1em 0;
-
-            span {
-                i:first-of-type {
-                    margin-right: .5rem;
-                }
-            }
-        }
-
-        .ui.divider {
-            margin: 0 auto;
-            width: 95%;
+            padding: 1em;
         }
     }
-
-    .add-menu {
-        .element,
-        .heading {
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .heading {
-            padding: 0;
-        }
-
-        .ui.transparent.input {
-            border-bottom: 1px solid rgba(34,36,38,.15);
-            padding: .25em;
-            margin-bottom: 0;
-
-            &:focus-within {
-                border-bottom-color: #767676;
-            }
-        }
-
-        .ui.segments {
-            height: 100%;
-            overflow-y: auto;
-
-            .secondary {
-                color: #9B9999;
-                margin-left: 0.75em;
-                font-size: 0.9em;
-            }
-        }
-    }
-
-    .ui.accordion {
-        .title {
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .entity-listing {
-            .listing {
-                padding: 1em;
-            }
-        }
-    }
-
 }

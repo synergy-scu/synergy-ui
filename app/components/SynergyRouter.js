@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Route, Switch, push as changePageAction } from 'react-router-dom';
 import Loadable from 'react-loadable';
 
@@ -14,6 +15,12 @@ export const getLoader = ({ pastDelay, error, retry }) => {
     return null;
 };
 
+getLoader.propTypes = {
+    pastDelay: PropTypes.bool,
+    error: PropTypes.bool,
+    retry: PropTypes.func,
+};
+
 export const createLoadable = path => Loadable({
     loader: () => import(path),
     loading: getLoader,
@@ -23,11 +30,9 @@ const AsyncSettingsPane = createLoadable('./settings/SettingsPaneContainer');
 const AsyncChartsPane = createLoadable('./cards/ChartPaneContainer');
 
 export const SynergyRouter = () =>
-    <div id='router'>
-        <Switch>
-            <Route exact path='/' component={AsyncSettingsPane} />
-            <Route exact path='/usage' component={AsyncChartsPane} />
-            <Route exact path='/settings' component={AsyncSettingsPane} />
-        </Switch>
-    </div>;
+    <Switch>
+        <Route exact path='/' component={AsyncSettingsPane} />
+        <Route exact path='/usage' component={AsyncChartsPane} />
+        <Route exact path='/settings' component={AsyncSettingsPane} />
+    </Switch>;
 

@@ -1,28 +1,32 @@
 import { connect } from 'react-redux';
+import { withAxios } from 'react-axios';
 
+import { AddMenu } from '../settings/menus/AddMenu';
 import ActionCreators from '../../actions';
-import { ChartPane } from './ChartPane';
 
 export const mapState = state => {
     return {
         entities: state.entities,
-        streams: state.streams,
-        chartsTab: state.chartsTab,
     };
 };
 
 export const mapDispatch = dispatch => {
     return {
-        changeTab: tabIndex => dispatch(ActionCreators.changeChartTab(tabIndex)),
+        create: createChartParams => dispatch(ActionCreators.createChart(createChartParams)),
     };
 };
 
 export const mergeProps = (stateProps, dispatchProps, ownProps) => {
+    const create = () => dispatchProps.create({
+        client: ownProps.axios,
+    });
+
     return {
         ...stateProps,
         ...dispatchProps,
         ...ownProps,
+        create,
     };
 };
 
-export default connect(mapState, mapDispatch, mergeProps)(ChartPane);
+export default withAxios(connect(mapState, mapDispatch, mergeProps)(AddMenu));
