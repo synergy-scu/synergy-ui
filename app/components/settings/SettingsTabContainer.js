@@ -1,4 +1,5 @@
 import { connect } from 'react-redux';
+import { withAxios } from 'react-axios';
 
 import ActionCreators from '../../actions';
 
@@ -18,7 +19,23 @@ export const mapDispatch = dispatch => {
         changeActiveDevice: deviceID => dispatch(ActionCreators.changeActiveDevice(deviceID)),
         changeActiveChannel: channelID => dispatch(ActionCreators.changeActiveChannel(channelID)),
         extractChannels: groups => dispatch(ActionCreators.extractChannels(groups)),
+        create: createGroupParams => dispatch(ActionCreators.createGroup(createGroupParams)),
     };
 };
 
-export default component => connect(mapState, mapDispatch)(component);
+export const mergeProps = (stateProps, dispatchProps, ownProps) => {
+    const create = (name, members) => dispatchProps.create({
+        axios: ownProps.axios,
+        name,
+        members,
+    });
+
+    return {
+        ...stateProps,
+        ...dispatchProps,
+        ...ownProps,
+        create,
+    };
+};
+
+export default component => withAxios(connect(mapState, mapDispatch, mergeProps)(component));

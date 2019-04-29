@@ -112,7 +112,7 @@ export const normalize = (data, entityType) => {
             return normalizeGroupMember(data);
         case 'charts':
             return normalizeChart(data);
-        case 'charling':
+        case 'chartling':
             return normalizeChartMember(data);
         case 'devices':
             return normalizeDevice(data);

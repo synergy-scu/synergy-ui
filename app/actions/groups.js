@@ -3,12 +3,15 @@ import uuidv4 from 'uuid/v4';
 import Actions from './types';
 import { validResponse, invalidRespone } from '../api/requests';
 import AXIOS_TIMEOUT from '../api/constants/AxiosTimeout';
+import { fetchEntity } from './entities';
 
-export const createGroupStart = () => {
+export const createGroupStart = (name, members) => {
     return {
         type: Actions.CREATE_GROUP_START,
         payload: {
             requestID: uuidv4(),
+            name,
+            members,
         },
     };
 };
@@ -37,15 +40,15 @@ export const createGroupError = ({ requestID, name, members, error }) => {
 };
 
 export const createGroup = ({ axios, name, members }) => dispatch => {
-    const newCreateGroupRequest = createGroupStart();
-    const id = newCreateGroupRequest.payload.id;
+    const newCreateGroupRequest = createGroupStart(name, members);
+    const requestID = newCreateGroupRequest.payload.requestID;
     dispatch(newCreateGroupRequest);
 
     let isResolved = false;
     setTimeout(() => {
         if (!isResolved) {
             dispatch(createGroupError({
-                requestID: id,
+                requestID,
                 name,
                 members,
                 error: new Error('Unable to create group. Request timed out.'),
@@ -53,9 +56,8 @@ export const createGroup = ({ axios, name, members }) => dispatch => {
         }
     }, AXIOS_TIMEOUT);
 
-    axios.post('group', {
-        type: 'create',
-        payload: {
+    axios.post('group/create', {
+        variables: {
             name,
             members: [...members.entries()].map(([uuid, type]) => {
                 return {
@@ -64,25 +66,27 @@ export const createGroup = ({ axios, name, members }) => dispatch => {
                 };
             }),
         },
-    }).then(response => {
-        if (validResponse(response)) {
-            return response.data;
-        } else if (invalidRespone(response)) {
-            return response.data.errors || new Error('An error occured creating a new group');
-        }
-        return new Error('An error occured communicating with Synergy Hub');
+    }).then(response =>
+        response.status === 201
+            ? response.data
+            : Promise.reject(response.error)
 
-    }).then(data => {
+    ).then(data => {
+        console.log(data);
         isResolved = true;
         dispatch(createGroupSuccess({
-            requestID: id,
-            groupID: data.payload.groupID,
-            data: data.payload,
+            requestID,
+            groupID: data.id,
+        }));
+        dispatch(fetchEntity({
+            axios,
+            entityType: 'group',
+            uuid: data.id,
         }));
     }).catch(error => {
         isResolved = true;
         dispatch(createGroupError({
-            requestID: id,
+            requestID,
             name,
             members,
             error,

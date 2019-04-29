@@ -2,44 +2,37 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Sidebar, Menu, Icon } from 'semantic-ui-react';
 
-import { ChartTypes } from '../../api/constants/ChartTypes';
+import { ChartTypes, ExtendedChartOptions } from '../../api/constants/ChartTypes';
 
-export const ChartSidebar = props =>
-    <Sidebar vertical
-        as={Menu}
-        animation='overlay'
-        direction='left'
-        visible={props.isMenuVisible}
-        onHide={props.toggleSidebar}>
-        <Menu.Item header style={{ display: 'flex', justifyContent: 'space-between', alignitems: 'center' }}>
-            <span>Charts</span>
-            <Icon link name='bars' onClick={props.toggleSidebar} />
-        </Menu.Item>
-        {
-            props.charts.map(chart => {
-                let icon;
-                if (chart.chartType === ChartTypes.LINE) {
-                    icon = 'chart line';
-                } else if (chart.chartType === ChartTypes.BAR) {
-                    icon = 'chart bar';
-                } else if (chart.chartType === ChartTypes.PIE) {
-                    icon = 'chart pie';
-                } else if (chart.chartType === ChartTypes.BURST) {
-                    icon = 'sun';
-                } else {
-                    icon = 'ban';
-                }
+export const ChartSidebar = props => {
+    const closeSidebar = () => props.toggleSidebar(false);
 
-                const onSelectChart = () => props.selectChart(chart);
-                return (
-                    <Menu.Item key={chart.key} as='a' onClick={onSelectChart}>
-                        {chart.name || 'Unnamed Chart'}
-                        <Icon name={icon} color={props.selected === chart.key ? 'green' : null}/>
-                    </Menu.Item>
-                );
-            })
-        }
-    </Sidebar>;
+    return (
+        <Sidebar vertical
+            as={Menu}
+            animation='overlay'
+            direction='left'
+            visible={props.isMenuVisible}
+            onHide={closeSidebar}>
+            <Menu.Item header style={{ display: 'flex', justifyContent: 'space-between', alignitems: 'center' }}>
+                <span>Charts</span>
+                <Icon link name='bars' onClick={closeSidebar} />
+            </Menu.Item>
+            {
+                props.charts.map(chart => {
+                    const icon = ExtendedChartOptions[chart.chartType].icon;
+                    const onSelectChart = () => props.selectChart(chart);
+                    return (
+                        <Menu.Item key={chart.key} as='a' onClick={onSelectChart}>
+                            {chart.name || 'Unnamed Chart'}
+                            <Icon name={icon} color={props.selected === chart.key ? 'green' : null} />
+                        </Menu.Item>
+                    );
+                })
+            }
+        </Sidebar>
+    );
+};
 
 ChartSidebar.propTypes = {
     isMenuVisible: PropTypes.bool,

@@ -17,8 +17,13 @@ export const mapDispatch = dispatch => {
 };
 
 export const mergeProps = (stateProps, dispatchProps, ownProps) => {
-    const create = () => dispatchProps.create({
-        client: ownProps.axios,
+    const create = ({ name, members, chartType, usageType, options }) => dispatchProps.create({
+        axios: ownProps.axios,
+        name,
+        members,
+        chartType,
+        usageType,
+        options,
     });
 
     return {

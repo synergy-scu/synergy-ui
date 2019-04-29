@@ -1,10 +1,19 @@
 import Actions from './types';
 
-export const changeChartTab = tabIndex => {
+export const changeChartTab = tab => {
     return {
         type: Actions.CHANGE_CHART_TAB,
         payload: {
-            tabIndex,
+            tab,
+        },
+    };
+};
+
+export const setSidebarVisibility = isVisible => {
+    return {
+        type: Actions.SET_SIDEBAR_VISIBILITY,
+        payload: {
+            isVisible,
         },
     };
 };

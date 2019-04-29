@@ -59,3 +59,35 @@ export const stripLongDecimal = value => {
 };
 
 export const combineUsages = amps => amps.reduce((acc, curr) => acc + curr, 0);
+
+export const calculateAverage = (channels, results) => {
+    if (!results.length) {
+        return {};
+    }
+
+    const averages = {};
+    channels.forEach(channel => {
+        averages[channel] = 0;
+    });
+
+    results.forEach(result => {
+        [...result.channels.entries()].forEach(([channel, amperage]) => {
+            averages[channel] += amperage;
+        });
+    });
+
+    Object.keys(averages).forEach(channel => {
+        averages[channel] /= results.length;
+    });
+
+    return averages;
+};
+
+export const calculateKWHs = (averages, timers) =>
+    Object.entries(averages).reduce((total, [channel, amperage]) => {
+        const durationInMillis = timers.get(channel).asMilliseconds();
+        const durationInHours = millisToHours(durationInMillis);
+        return total + ampsTokWh(amperage, durationInHours);
+    }, 0);
+
+export const calculateCost = (kWhs, costPerKWH) => kWhs * costPerKWH;

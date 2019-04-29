@@ -3,9 +3,14 @@
 }
 
 .ui.menu {
+    .search {
+        padding: 0;
+    }
+
     .ui.category.search {
         input {
             border: none;
+            background-color: #F9FBFA;
         }
     }
 }

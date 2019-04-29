@@ -146,17 +146,23 @@ export const currentRequest = (state = fetchAllRequest({}), action) => {
 const defaultEntities = { groups: new Map(), devices: new Map(), channels: new Map(), charts: new Map() };
 export const entities = (state = defaultEntities, action) => {
     switch (action.type) {
+        case Actions.FETCH_ENTITY_SUCCESS:
         case Actions.FETCH_ALL_SUCCESS: {
+            const items = new Map(state[action.payload.entityType]);
+
             switch (action.payload.entityType) {
                 case 'channels':
                 case 'devices':
                     if (Array.isArray(action.payload.data)) {
                         action.payload.data.forEach(entity => {
                             const normalizedEntity = normalize(entity, action.payload.entityType);
-                            state[action.payload.entityType].set(normalizedEntity.key, normalizedEntity);
+                            items.set(normalizedEntity.key, normalizedEntity);
                         });
 
-                        return { ...state };
+                        return {
+                            ...state,
+                            [action.payload.entityType]: items,
+                        };
                     }
                     return state;
                 case 'groups':
@@ -165,24 +171,25 @@ export const entities = (state = defaultEntities, action) => {
                     if (Array.isArray(action.payload.data[action.payload.entityType])) {
                         action.payload.data[action.payload.entityType].forEach(parent => {
                             const normalizedEntity = normalize(parent, action.payload.entityType);
-                            state[action.payload.entityType].set(normalizedEntity.key, normalizedEntity);
+                            items.set(normalizedEntity.key, normalizedEntity);
                         });
                     }
 
                     if (Array.isArray(action.payload.data.members)) {
                         action.payload.data.members.forEach(member => {
-                            const parent = state[action.payload.entityType].get(member[action.payload.entityType === 'groups' ? 'groupID' : 'chartID']);
-                            parent.members.push(normalize(member, action.payload.entityType === 'groups' ? 'groupling' : 'charling'));
-                            state[action.payload.entityType].set(parent.key, parent);
+                            const parent = items.get(member[action.payload.entityType === 'groups' ? 'groupID' : 'chartID']);
+                            parent.members.push(normalize(member, action.payload.entityType === 'groups' ? 'groupling' : 'chartling'));
+                            items.set(parent.key, parent);
                         });
                     }
-                    return { ...state };
+                    return {
+                        ...state,
+                        [action.payload.entityType]: items,
+                    };
                 default:
                     return state;
             }
         }
-        case Actions.FETCH_SUCCESS:
-            return state;
         case Actions.FETCH_ALL_FINISH:
         case Actions.EXTRACT_ALL_CHANNELS: {
             const devices = new Map(state.devices);

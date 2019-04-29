@@ -1,24 +1,11 @@
 import Actions from '../actions';
-import TabPanes from '../components/settings/menus/TabPanes';
 
-const TabIndicies = TabPanes.reduce((accumulator, tab, idx) => {
-    accumulator[tab.entity] = idx;
-    return accumulator;
-}, {});
-
-export const settingsTab = (state = 1, action) => {
+export const settingsTab = (state = 'group', action) => {
     switch (action.type) {
         case Actions.CHANGE_SETTINGS_TAB:
-            if (action.payload.tabIndex < TabPanes.length) {
-                return action.payload.tabIndex;
-            }
-            return state;
+            return action.payload.tabIndex;
         case Actions.SELECT_SEARCH: {
-            const index = TabIndicies[action.payload.entity];
-            if (index >= 0) {
-                return index;
-            }
-            return state;
+            return action.payload.entity;
         }
         default:
             return state;

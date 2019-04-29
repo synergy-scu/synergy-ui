@@ -32,7 +32,7 @@ const AsyncChartsPane = createLoadable('./cards/ChartPaneContainer');
 export const SynergyRouter = () =>
     <Switch>
         <Route exact path='/' component={AsyncSettingsPane} />
-        <Route exact path='/usage' component={AsyncChartsPane} />
+        <Route exact path='/home' component={AsyncChartsPane} />
         <Route exact path='/settings' component={AsyncSettingsPane} />
     </Switch>;
 

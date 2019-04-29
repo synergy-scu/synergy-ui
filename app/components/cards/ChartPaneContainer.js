@@ -7,13 +7,15 @@ export const mapState = state => {
     return {
         entities: state.entities,
         streams: state.streams,
-        chartsTab: state.chartsTab,
+        activeTab: state.chartsTab,
+        isSidebarOpen: state.isSidebarOpen,
     };
 };
 
 export const mapDispatch = dispatch => {
     return {
-        changeTab: tabIndex => dispatch(ActionCreators.changeChartTab(tabIndex)),
+        changeTab: tab => dispatch(ActionCreators.changeChartTab(tab)),
+        toggleSidebar: isVisible => dispatch(ActionCreators.setSidebarVisibility(isVisible)),
     };
 };
 

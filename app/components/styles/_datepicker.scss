@@ -1,0 +1,18 @@
+.DateRangePicker {
+    width: 100%;
+
+    .DateRangePickerInput {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+
+        .DateInput {
+            flex: 1 1;
+        }
+
+        .DateRangePickerInput_arrow {
+            margin: 0 0.6em 0 0.4em;
+        }
+    }
+}

@@ -5,8 +5,10 @@ import { escapeRegExp, filter, debounce, orderBy } from 'lodash';
 import memoize from 'memoize-one';
 import { isDeepStrictEqual } from 'util';
 
+import { ChartTypes, UsageTypes } from '../../../api/constants/ChartTypes';
 import { capitalize } from '../../../api/utils';
 import { getSortFunctions } from '../../../api/sort';
+import { ChartForm } from '../../cards/sections/ChartForm';
 
 export class AddMenu extends React.Component {
     constructor(props) {
@@ -14,14 +16,19 @@ export class AddMenu extends React.Component {
 
         this.state = {
             name: '',
-            nameError: false,
+
             search: '',
+            filterBy: new Set(),
             selection: new Map(),
             selectedGroups: new Map(),
             selectedDevices: new Map(),
+
+            selectedChart: ChartTypes.NONE,
+            chartOptions: {},
+
+            nameError: false,
             selectionError: false,
             isErrorVisible: false,
-            filterBy: new Set(),
         };
     }
 
@@ -36,59 +43,37 @@ export class AddMenu extends React.Component {
             channels: PropTypes.instanceOf(Map).isRequired,
         }).isRequired,
         groupType: PropTypes.string.isRequired,
+        usageType: PropTypes.oneOf(Object.values(UsageTypes)),
+        create: PropTypes.func.isRequired,
     };
 
     reset = () => {
         this.setState({
             name: '',
-            nameError: false,
             search: '',
             selection: new Map(),
             selectedGroups: new Map(),
             selectedDevices: new Map(),
-            selectionError: false,
-            isErrorVisible: false,
+            selectedChart: ChartTypes.NONE,
+            chartOptions: {},
             hideDisabled: false,
         });
     };
 
-    validateGroup = () => {
-        let valid = true;
-
-        this.setState({
-            nameError: false,
-            selectionError: false,
-            isErrorVisible: false,
-        });
-
-        if (this.state.name.length < 3) {
-            this.setState({ nameError: true });
-            valid = false;
-        }
-
-        const re = new RegExp(escapeRegExp(this.state.name));
-        if (re.test(this.state.value)) {
-            this.setState({ nameError: true });
-            valid = false;
-        }
-
-        if (this.state.selection.size === 0) {
-            this.setState({ selectionError: true });
-            valid = false;
-        }
-
-        return valid;
-    };
-
-    createGroup = () => {
-        if (this.validateGroup()) {
-            console.log('ADD_GROUP', this.state.name, this.state.selection);
-            this.reset();
+    create = () => {
+        if (this.props.groupType === 'group') {
+            this.props.create({
+                name: this.state.name,
+                members: this.state.selection,
+            });
         } else {
-            this.setState({ isErrorVisible: true });
-            setTimeout(() => {
-                this.setState({ isErrorVisible: false });
-            }, 7000);
+            this.props.create({
+                name: this.state.name,
+                members: this.state.selection,
+                chartType: this.state.selectedChart,
+                usageType: this.props.usageType,
+                options: this.state.chartOptions,
+            });
         }
     };
 
@@ -122,7 +107,7 @@ export class AddMenu extends React.Component {
         this.setState({
             filterBy: new Set(types),
         });
-    }
+    };
 
     selectItem = (checked, item) => {
         this.setState({ isErrorVisible: false });
@@ -158,6 +143,35 @@ export class AddMenu extends React.Component {
         }
     };
 
+    onSelectChart = (event, { value }) => {
+        if (value === '') {
+            this.setState({
+                selectedChart: ChartTypes.NONE,
+                chartOptions: {},
+            });
+        } else {
+            this.setState({
+                selectedChart: ChartTypes[value],
+                chartOptions: {},
+            });
+        }
+    };
+
+    onCheckChartOption = (event, { option, checked }) => {
+        const chartOptions = {
+            ...this.state.chartOptions,
+            [option]: checked,
+        };
+
+        if (!checked) {
+            delete chartOptions[option];
+        }
+
+        this.setState({
+            chartOptions,
+        });
+    };
+
     isMatch = (types, value) => result => {
         const re = new RegExp(escapeRegExp(value), 'i');
         if (value.length && types.size) {
@@ -183,6 +197,7 @@ export class AddMenu extends React.Component {
         let items = [];
         const entities = ['group', 'device', 'channel'];
         const caps = capitalize(this.props.groupType);
+        const isForGroups = this.props.groupType === 'group';
 
         entities.forEach(entity => {
             const selector = `${entity}s`;
@@ -227,9 +242,16 @@ export class AddMenu extends React.Component {
             errorContent.push({ type: 'selection', message: `You must select at least one ${this.props.groupType} member. Select ${this.props.groupType} members below` });
         }
 
+        const isGroupDisabled = this.state.name.length < 3
+            || !this.state.selection.size
+            || this.state.selection.size === 1 && this.state.selectedGroups.size === 1;
+        const isChartDisabled = !this.state.selection.size
+            || !this.state.name.length
+            || this.state.selectedChart === ChartTypes.NONE;
+
         return (
             <Grid>
-                <Grid.Column width={5} className='squarify'>
+                <Grid.Column width={isForGroups ? 5 : 4} className='squarify'>
                     <Menu vertical fluid>
                         <Menu.Item>
                             <Input transparent
@@ -261,21 +283,33 @@ export class AddMenu extends React.Component {
                             </Menu.Menu>
                         </Menu.Item>
                     </Menu>
+                    {
+                        this.props.groupType === 'group' &&
+                            <Segment>
+                                <Input fluid placeholder={`${caps} Name`} value={this.state.name} error={this.state.nameError} onChange={this.onNameChange} />
+                                <span className='secondary' style={{ marginLeft: '0.5em' }}>Names must be at least 3 characters long</span>
+                                <Popup
+                                    open={isErrorVisible}
+                                    disabled={!isErrorVisible}
+                                    trigger={
+                                        <Button fluid
+                                            disabled={isGroupDisabled}
+                                            content={`Create ${caps}`}
+                                            positive={!isErrorVisible}
+                                            negative={isErrorVisible}
+                                            onClick={this.create}
+                                            style={{ marginTop: '1em' }} />}
+                                    content={errorContent.map(item =>
+                                        <p key={item.type}>{item.message}</p>
+                                    )} />
+                            </Segment>
+                    }
                 </Grid.Column>
-                <Grid.Column width={11} className='squarify'>
+                <Grid.Column width={isForGroups ? 11 : 7} className='squarify'>
                     <Segment className="add-menu">
-                        <Header content={`Select ${caps} Members`} />
-                        <Segment basic className="heading">
-                            <Input placeholder={`${caps} Name`} value={this.state.name} error={this.state.nameError} onChange={this.onNameChange} />
-                            <Popup
-                                open={isErrorVisible}
-                                disabled={!isErrorVisible}
-                                trigger={<Button content={`Create ${caps}`} positive={!isErrorVisible} negative={isErrorVisible} onClick={this.createGroup} />}
-                                content={errorContent.map(item =>
-                                    <p key={item.type}>{item.message}</p>
-                                )}
-                            />
-                        </Segment>
+                        <Header content={`Select ${caps} Members`} className='has-help-text' />
+                        <span className='secondary' style={{ display: 'block' }}>You must select at least 1 item</span>
+                        { this.props.groupType === 'group' && <span className='secondary help-text'>The sole member of a group cannot be another group</span> }
                         <Segment.Group>
                             {filtered.map(item => {
                                 const isDisabled = disabledItems.has(item.uuid);
@@ -293,9 +327,24 @@ export class AddMenu extends React.Component {
                                 );
                             })}
                         </Segment.Group>
-                        <Button content={`Create ${caps}`} fluid positive={!isErrorVisible} negative={isErrorVisible} onClick={this.createGroup} />
                     </Segment>
                 </Grid.Column>
+                {
+                    !isForGroups &&
+                        <Grid.Column width={5} className='squarify'>
+                            <Segment>
+                                <ChartForm
+                                    name={this.state.name}
+                                    selected={this.state.selectedChart}
+                                    options={this.state.chartOptions}
+                                    onNameChange={this.onNameChange}
+                                    onSelectChart={this.onSelectChart}
+                                    onCheckChartOption={this.onCheckChartOption}
+                                    isSubmitDisabled={isChartDisabled}
+                                    onSubmit={this.create} />
+                            </Segment>
+                        </Grid.Column>
+                }
             </Grid>
         );
     }

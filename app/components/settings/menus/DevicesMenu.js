@@ -1,16 +1,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Grid, Segment } from 'semantic-ui-react';
+import { Grid, Segment, Button, Icon } from 'semantic-ui-react';
 
 import { EntityMenu } from '../sections/EntityMenu';
 import { EntityListing } from '../sections/EntityListing';
-import { sortByNumericProperty } from '../../../api/sort';
 
 export class DevicesMenu extends React.Component {
     constructor(props) {
         super(props);
 
-        this.state = {};
+        this.state = {
+            confirmDelete: false,
+            isDeleting: false,
+        };
     }
 
     static propTypes = {
@@ -41,6 +43,29 @@ export class DevicesMenu extends React.Component {
         return result;
     };
 
+    deleteDevice = () => {
+        if (!this.state.confirmDelete) {
+            this.setState({
+                confirmDelete: true,
+            });
+        } else {
+            // this.props.deleteDevice();
+            console.log('DELETE DEVICE');
+            this.setState({
+                confirmDelete: false,
+                isDeleting: true,
+            });
+        }
+    };
+
+    changeActiveDevice = itemID => {
+        this.props.changeActiveDevice(itemID);
+        this.setState({
+            confirmDelete: false,
+            isDeleting: false,
+        });
+    };
+
     render() {
         const { devices } = this.props.entities;
         let activeDevice = null;
@@ -56,14 +81,26 @@ export class DevicesMenu extends React.Component {
                         entityType="device"
                         activeItem={this.props.activeDevice}
                         items={devices}
-                        setActiveItem={this.props.changeActiveDevice} />
+                        setActiveItem={this.changeActiveDevice} />
                 </Grid.Column>
 
                 <Grid.Column width={11} className="squarify">
                     {
                         activeDevice &&
                             <Segment.Group>
-                                <Segment>{activeDevice.name || 'Unnamed Device'}</Segment>
+                                <Segment className='split'>
+                                    <span>{activeDevice.name || 'Unnamed Device'}</span>
+                                    <Button icon compact
+                                        loading={this.state.isDeleting}
+                                        labelPosition={this.state.confirmDelete ? 'right' : null}
+                                        color={this.state.confirmDelete ? 'red' : null}
+                                        onClick={this.deleteDevice}>
+                                        {
+                                            this.state.confirmDelete && 'Confirm'
+                                        }
+                                        <Icon name={this.state.confirmDelete ? 'warning circle' : 'trash alternate outline'} />
+                                    </Button>
+                                </Segment>
                                 <Segment>
                                     {
                                         activeDevice &&

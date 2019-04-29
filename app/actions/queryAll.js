@@ -90,6 +90,7 @@ export const fetchAll = ({ axios }) => dispatch => {
                 }));
             }).catch(error => {
                 isResolved = true;
+                console.error(error);
                 dispatch(fetchAllError({
                     requestID: id,
                     entityType,

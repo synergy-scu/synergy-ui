@@ -1,0 +1,19 @@
+.split {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.secondary {
+    color: #5E5E5E;
+    font-size: 0.75em;
+}
+
+.has-help-text {
+    margin-bottom: 0 !important;
+}
+
+.help-text {
+    margin-bottom: 1em;
+    display: block;
+}
