@@ -2,13 +2,14 @@ import IO from '../Socket';
 import Actions from './types';
 import moment from 'moment';
 
-export const streamNew = ({ chartID, streamID, channels, socket }) => {
+export const streamNew = ({ chartID, streamID, channels, members, socket }) => {
     return {
         type: Actions.STREAM_NEW,
         payload: {
             chartID,
             streamID,
             channels,
+            members,
             socket,
         },
     };
@@ -86,17 +87,17 @@ export const streamError = (chartID, error) => {
     };
 };
 
-export const streamUsage = ({ streamID, chartID, chartMeta, channels }) => dispatch => {
+export const streamUsage = ({ streamID, chartID, chartMeta, channels, members }) => dispatch => {
     const socket = IO.socket(`/${chartID}`);
     let responseNum = 0;
     let responseTime = moment();
 
-    dispatch(streamNew({ chartID, streamID, socket, channels }));
+    dispatch(streamNew({ chartID, streamID, channels, members, socket }));
 
     socket.on('usage', response => {
         const now = moment();
         if (Array.isArray(response.data.results)) {
-            console.log('#', responseNum, ' in ', now.valueOf() - responseTime.valueOf(), 'ms');
+            // console.log('#', responseNum, ' in ', now.valueOf() - responseTime.valueOf(), 'ms');
             responseNum++;
             responseTime = now;
             dispatch(streamResult(chartID, response.data));

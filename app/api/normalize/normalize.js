@@ -12,6 +12,7 @@ export const normalizeChart = ({ name, chartID, chartType, usageType, options = 
         options,
         count: members,
         members: [],
+        extracted: new Set(),
         all: all === 1,
         created: new Date(created),
         updated: new Date(updated),
@@ -35,6 +36,7 @@ export const normalizeGroup = ({ name, groupID, members, created, updated }) => 
         groupID,
         count: members,
         members: [],
+        extracted: new Set(),
         created: new Date(created),
         updated: new Date(updated),
     };

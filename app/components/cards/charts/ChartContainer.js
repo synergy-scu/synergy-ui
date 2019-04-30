@@ -3,7 +3,7 @@ import { withAxios } from 'react-axios';
 
 import ActionCreators from '../../../actions';
 
-import { defaultStream } from '../../../api/socket/usageUtils';
+import { defaultStream, extractGroupedMembers, getChannelsFromGroup } from '../../../api/socket/usageUtils';
 import { defaultChart } from '../../../api/constants/ChartTypes';
 
 export const mapState = state => {
@@ -32,18 +32,24 @@ export const mergeProps = (stateProps, dispatchProps, ownProps) => {
         chart,
 
         disconnect: () => stream.socket.disconnect(),
-        fetchUsage: ({ chartMeta = {}, variables = {} }) => dispatchProps.fetchUsage({
-            axios: ownProps.axios,
-            chartID: ownProps.chartID,
-            chartMeta: {
-                chartType: chart.chartType,
-                usageType: chart.usageType,
-                ...chart.options,
-                ...chartMeta,
-            },
-            variables,
-            channels: chart.members.map(member => member.uuid),
-        }),
+        fetchUsage: ({ chartMeta = {}, variables = {} }) => {
+            const members = extractGroupedMembers(chart.members, stateProps.entities);
+            const channels = getChannelsFromGroup(members);
+
+            return dispatchProps.fetchUsage({
+                axios: ownProps.axios,
+                chartID: ownProps.chartID,
+                chartMeta: {
+                    chartType: chart.chartType,
+                    usageType: chart.usageType,
+                    ...chart.options,
+                    ...chartMeta,
+                },
+                variables,
+                channels: [...channels.values()],
+                members,
+            });
+        },
     };
 };
 

@@ -1,16 +1,19 @@
 import moment from 'moment';
 import { round } from 'lodash';
 
-export const defaultStream = ({ chartID = '', streamID = '', start = moment(), channels = [], socket = null, connected = false, results = [], timers = new Map() }) => {
+export const defaultStream = ({ chartID = '', streamID = '', start = moment(), channels = [], members = [], socket = null, connected = false, results = [], groupedResults, timers = new Map(), groupedTimers = new Map() }) => {
     return {
         chartID,
         streamID,
         start,
         channels,
+        members,
         socket,
         connected,
         results,
+        groupedResults,
         timers,
+        groupedTimers,
     };
 };
 
@@ -34,6 +37,40 @@ export const getUniqueChannels = items => {
                 time: moment(usage.time),
             });
         }
+    });
+    return channels;
+};
+
+export const extractGroupedMembers = (members, entities) =>
+    members.map(member => {
+        const extractedMember = entities[`${member.type}s`].get(member.uuid) || {};
+        const minimumMember = {
+            uuid: member.uuid,
+            type: member.type,
+        };
+
+        switch (member.type) {
+            case 'group':
+                minimumMember.channels = extractedMember.extracted;
+                break;
+            case 'device':
+                minimumMember.channels = new Set(extractedMember.channels.map(channel => channel.uuid));
+                break;
+            case 'channel':
+                minimumMember.channels = new Set(member.uuid);
+                break;
+            default:
+                minimumMember.channels = new Set();
+                break;
+        }
+
+        return minimumMember;
+    });
+
+export const getChannelsFromGroup = members => {
+    let channels = new Set();
+    members.forEach(member => {
+        channels = new Set([...channels, ...member.channels]);
     });
     return channels;
 };
