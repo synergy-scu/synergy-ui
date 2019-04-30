@@ -100,7 +100,7 @@ export class ChartPane extends React.Component {
                             onClick={this.onTabChange}>
                             <Icon name='bars' />
                         </Menu.Item>
-                        <Menu.Item content={this.props.activeTab === 'view' ? `Real-time Usage${this.state.selectedChart.length ? chartPath : ''}` : 'Create Chart'} />
+                        <Menu.Item content={this.props.activeTab === 'view' ? `View${this.state.selectedChart.length ? chartPath : ''}` : 'Create Chart'} />
                         <Menu.Menu position='right'>
                             <Menu.Item link
                                 name='view'

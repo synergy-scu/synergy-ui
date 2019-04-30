@@ -2,12 +2,13 @@ import uuidv4 from 'uuid/v4';
 
 import Actions from './types';
 
-export const extractChannels = (groups, devices) => {
+export const extractChannels = (entityType, uuid, data) => {
     return {
         type: Actions.EXTRACT_CHANNELS,
         payload: {
-            groups,
-            devices,
+            entityType,
+            uuid,
+            data,
         },
     };
 };
@@ -89,6 +90,9 @@ export const fetchEntity = ({ axios, entityType, uuid }) => dispatch => {
             data,
         }));
         console.log(data);
+        return data;
+    }).then(data => {
+        dispatch(extractChannels(entityType, data));
     }).catch(error => {
         isResolved = true;
         dispatch(fetchEntityError({

@@ -1,5 +1,5 @@
 import Actions from '../actions';
-import { normalize, extractGroupChannels } from '../api/normalize/normalize';
+import { normalize, extractChannels } from '../api/normalize/normalize';
 import { fetchAllRequest, entityRequest, fetchRequest } from '../api/requests';
 import RequestStates from '../api/constants/RequestStates';
 
@@ -204,15 +204,26 @@ export const entities = (state = defaultEntities, action) => {
                     channels,
                 });
             });
-            state.devices = devices;
 
             const groups = new Map(state.groups);
             state.groups.forEach(group => {
                 groups.set(group.groupID, {
                     ...group,
-                    extracted: extractGroupChannels(group, {
+                    extracted: extractChannels(group, {
                         ...state,
                         devices,
+                    }),
+                });
+            });
+
+            const charts = new Map(state.charts);
+            state.charts.forEach(chart => {
+                charts.set(chart.chartID, {
+                    ...chart,
+                    extracted: extractChannels(chart, {
+                        ...state,
+                        devices,
+                        groups,
                     }),
                 });
             });
@@ -221,17 +232,47 @@ export const entities = (state = defaultEntities, action) => {
                 ...state,
                 devices,
                 groups,
+                charts,
             };
         }
-        case Actions.EXTRACT_CHANNELS:
-            action.payload.groups.forEach(group => {
-                state.groups.set(group.groupID, {
-                    ...group,
-                    extracted: extractGroupChannels(group, state),
-                });
-            });
-            return { ...state };
+        case Actions.EXTRACT_CHANNELS: {
+            const items = new Map(state[action.payload.entityType]);
 
+            switch (action.payload.entityType) {
+                case 'groups':
+                case 'charts': {
+                    const item = items.get(action.payload.uuid);
+                    items.set(action.payload.uuid, {
+                        ...item,
+                        extracted: extractChannels(item, state),
+                    });
+                    return {
+                        ...state,
+                        [action.payload.entityType]: items,
+                    };
+                }
+                case 'devices': {
+                    const item = items.get(action.payload.uuid);
+                    const channels = new Set(
+                        [...state.channels.values()]
+                            .filter(channel => channel.deviceID === action.payload.uuid)
+                            .map(channel => channel.channelID)
+                    );
+
+                    items.set(action.payload.uui, {
+                        ...item,
+                        channels,
+                    });
+
+                    return {
+                        ...state,
+                        [action.payload.entityType]: items,
+                    };
+                }
+                default:
+                    return state;
+            }
+        }
         default:
             return state;
     }

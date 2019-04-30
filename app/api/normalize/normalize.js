@@ -71,13 +71,13 @@ export const normalizeChannel = ({ name, channelID, deviceID, created, updated }
     };
 };
 
-export const extractGroupChannels = (group, entities, extractedChannels = new Set()) => {
+export const extractChannels = (group, entities, extractedChannels = new Set()) => {
     group.members.forEach(member => {
         switch (member.type) {
             case 'group': {
                 const nextGroup = entities.groups.get(member.uuid);
                 if (nextGroup) {
-                    extractGroupChannels(nextGroup, entities, extractedChannels);
+                    extractChannels(nextGroup, entities, extractedChannels);
                 }
                 break;
             }

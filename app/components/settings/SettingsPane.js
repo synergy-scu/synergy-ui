@@ -53,22 +53,6 @@ export class SettingsPane extends React.Component {
                     <ConnectedComponent />
                 </Segment>
             </div>
-            // <Tab
-            //     id="settings"
-            //     menu={{ secondary: true, pointing: true }}
-            //     panes={TabPanes.map(pane => {
-            //         const ConnectedPane = SettingsTabContainer(pane.component);
-            //         return {
-            //             menuItem: pane.menuItem,
-            //             render: () =>
-            //                 <Tab.Pane attached={false}>
-            //                     <ConnectedPane />
-            //                 </Tab.Pane>,
-            //         };
-            //     })}
-            //     activeIndex={this.props.activeTab}
-            //     onTabChange={this.onTabChange}
-            // />
         );
     }
 }
