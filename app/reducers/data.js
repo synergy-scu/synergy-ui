@@ -194,11 +194,7 @@ export const entities = (state = defaultEntities, action) => {
         case Actions.EXTRACT_ALL_CHANNELS: {
             const devices = new Map(state.devices);
             state.devices.forEach(device => {
-                const channels = new Set(
-                    [...state.channels.values()]
-                        .filter(channel => channel.deviceID === device.deviceID)
-                        .map(channel => channel.channelID)
-                );
+                const channels = [...state.channels.values()].filter(channel => channel.deviceID === device.deviceID);
                 devices.set(device.deviceID, {
                     ...device,
                     channels,
@@ -253,13 +249,9 @@ export const entities = (state = defaultEntities, action) => {
                 }
                 case 'devices': {
                     const item = items.get(action.payload.uuid);
-                    const channels = new Set(
-                        [...state.channels.values()]
-                            .filter(channel => channel.deviceID === action.payload.uuid)
-                            .map(channel => channel.channelID)
-                    );
+                    const channels = [...state.channels.values()].filter(channel => channel.deviceID === action.payload.uuid);
 
-                    items.set(action.payload.uui, {
+                    items.set(action.payload.uuid, {
                         ...item,
                         channels,
                     });

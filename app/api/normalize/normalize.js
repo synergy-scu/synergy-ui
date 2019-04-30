@@ -4,6 +4,7 @@ import { ChartTypes, UsageTypes } from '../constants/ChartTypes';
 export const normalizeChart = ({ name, chartID, chartType, usageType, options = {}, members, all, created, updated }) => {
     return {
         key: chartID,
+        uuid: chartID,
         name,
         chartID,
         chartType: get(ChartTypes, chartType.toUpperCase(), ChartTypes.NONE),
@@ -29,6 +30,7 @@ export const normalizeChartMember = ({ chartID, uuid, type, added }) => {
 export const normalizeGroup = ({ name, groupID, members, created, updated }) => {
     return {
         key: groupID,
+        uuid: groupID,
         name,
         groupID,
         count: members,
@@ -48,13 +50,13 @@ export const normalizeGroupMember = ({ groupID, uuid, type, added }) => {
 };
 
 export const normalizeDevice = ({ name, deviceID, channels, created, updated }) => {
-    // Extracting the 'id' so it doesnt get included in ...device
     return {
         key: deviceID,
+        uuid: deviceID,
         name,
         deviceID,
         count: channels,
-        channels: new Set(),
+        channels: [],
         created: new Date(created),
         updated: new Date(updated),
     };
@@ -63,6 +65,7 @@ export const normalizeDevice = ({ name, deviceID, channels, created, updated }) 
 export const normalizeChannel = ({ name, channelID, deviceID, created, updated }) => {
     return {
         key: channelID,
+        uuid: channelID,
         name,
         channelID,
         deviceID,

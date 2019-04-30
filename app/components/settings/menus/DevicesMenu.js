@@ -25,24 +25,6 @@ export class DevicesMenu extends React.Component {
         changeActiveDevice: PropTypes.func.isRequired,
     };
 
-    getChannels = group => {
-        const result = {
-            groups: [],
-            devices: [],
-            channels: [],
-        };
-        group.members.forEach(member => {
-            if (member.type === 'group') {
-                result.groups.push(member);
-            } else if (member.type === 'device') {
-                result.devices.push(member);
-            } else if (member.type === 'channel') {
-                result.channels.push(member);
-            }
-        });
-        return result;
-    };
-
     deleteDevice = () => {
         if (!this.state.confirmDelete) {
             this.setState({
@@ -106,12 +88,7 @@ export class DevicesMenu extends React.Component {
                                         activeDevice &&
                                             <EntityListing
                                                 entityType="channel"
-                                                items={[...activeDevice.channels.values()].map(channel => {
-                                                    return {
-                                                        ...this.props.entities.channels.get(channel),
-                                                        uuid: channel,
-                                                    };
-                                                })} />
+                                                items={activeDevice.channels} />
                                     }
                                 </Segment>
                             </Segment.Group>
