@@ -66,12 +66,13 @@ export const streamClose = chartID => {
     };
 };
 
-export const streamResult = (chartID, data) => {
+export const streamResult = (chartID, data, reverseLookup) => {
     return {
         type: Actions.STREAM_RESULT,
         payload: {
             chartID,
             data,
+            reverseLookup,
         },
     };
 };
@@ -92,6 +93,11 @@ export const streamUsage = ({ streamID, chartID, chartMeta, channels, members })
     let responseNum = 0;
     let responseTime = moment();
 
+    const reverseLookup = new Map();
+    members.forEach(member => {
+        member.channels.forEach(channel => reverseLookup.set(channel, member.uuid));
+    });
+
     dispatch(streamNew({ chartID, streamID, channels, members, socket }));
 
     socket.on('usage', response => {
@@ -100,7 +106,7 @@ export const streamUsage = ({ streamID, chartID, chartMeta, channels, members })
             // console.log('#', responseNum, ' in ', now.valueOf() - responseTime.valueOf(), 'ms');
             responseNum++;
             responseTime = now;
-            dispatch(streamResult(chartID, response.data));
+            dispatch(streamResult(chartID, response.data, reverseLookup));
         }
     });
 

@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Sidebar, Menu, Icon, Segment, Popup } from 'semantic-ui-react';
 import memoize from 'memoize-one';
-import { isEqual } from 'lodash';
+import { isDeepStrictEqual } from 'util';
 
 import { ChartTypes, UsageTypes } from '../../api/constants/ChartTypes';
 
@@ -47,12 +47,12 @@ export class ChartPane extends React.Component {
             selectedChart: chartID,
             selectedType: chartType,
         });
-        this.props.changeTab(0);
+        this.props.changeTab('view');
         this.props.toggleSidebar(false);
     };
 
     chartSwitcher = memoize(chart => {
-        switch (chart.type) {
+        switch (chart.chartType) {
             case ChartTypes.LINE:
                 return LineChart;
             case ChartTypes.PIE:
@@ -64,7 +64,7 @@ export class ChartPane extends React.Component {
             default:
                 return NoChart;
         }
-    }, isEqual);
+    }, isDeepStrictEqual);
 
     onTabChange = (event, { name }) => {
         if (name === 'menu') {
@@ -76,8 +76,9 @@ export class ChartPane extends React.Component {
 
     render() {
 
-        const Chart = createChart(this.chartSwitcher(this.state.selectedType, this.state.selectedChart));
-        const Component = this.props.activeTab === 'view' ? Chart : AddMenuContainer;
+        const chart = this.props.entities.charts.get(this.state.selectedChart) || {};
+        const ChartContainer = createChart(this.chartSwitcher(chart));
+        const Component = this.props.activeTab === 'view' ? ChartContainer : AddMenuContainer;
         const componentProps = this.props.activeTab === 'view'
             ? { chartID: this.state.selectedChart }
             : { groupType: 'chart', usageType: UsageTypes.REALTIME };

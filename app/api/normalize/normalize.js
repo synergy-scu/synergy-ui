@@ -9,7 +9,7 @@ export const normalizeChart = ({ name, chartID, chartType, usageType, options = 
         chartID,
         chartType: get(ChartTypes, chartType.toUpperCase(), ChartTypes.NONE),
         usageType: get(UsageTypes, usageType.toUpperCase(), UsageTypes.NONE),
-        options,
+        options: options ? JSON.parse(options) : {},
         count: members,
         members: [],
         extracted: new Set(),

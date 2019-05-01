@@ -1,7 +1,19 @@
 import moment from 'moment';
 import { round } from 'lodash';
 
-export const defaultStream = ({ chartID = '', streamID = '', start = moment(), channels = [], members = [], socket = null, connected = false, results = [], groupedResults, timers = new Map(), groupedTimers = new Map() }) => {
+export const defaultStream = ({
+    chartID = '',
+    streamID = '',
+    start = moment(),
+    channels = [],
+    members = [],
+    socket = null,
+    connected = false,
+    results = [],
+    groupedResults = [],
+    timers = new Map(),
+    groupedTimers = new Map(),
+}) => {
     return {
         chartID,
         streamID,
@@ -57,7 +69,7 @@ export const extractGroupedMembers = (members, entities) =>
                 minimumMember.channels = new Set(extractedMember.channels.map(channel => channel.uuid));
                 break;
             case 'channel':
-                minimumMember.channels = new Set(member.uuid);
+                minimumMember.channels = new Set([member.uuid]);
                 break;
             default:
                 minimumMember.channels = new Set();

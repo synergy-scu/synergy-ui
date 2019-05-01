@@ -64,7 +64,8 @@ export class LineChart extends React.Component {
     render() {
         const { chart, stream } = this.props;
         const points = this.getPoints(stream.results, false);
-        const maxY = points.length ? maxBy(points, 'y').y * 3 : 0;
+        let maxY = points.length ? maxBy(points, 'y').y * 3 : 1;
+        maxY = maxY > 0 ? maxY : 1;
 
         const kWhs = calculateKWHs(calculateAverage(stream.channels, stream.results), stream.timers);
         const cost = calculateCost(kWhs, this.props.user.cost);

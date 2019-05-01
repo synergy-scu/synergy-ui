@@ -70,7 +70,7 @@ export const usageEnd = ({ requestID, streamID, chartID, chartMeta, ...props }) 
     };
 };
 
-export const requestStream = ({ axios, chartID, chartMeta, variables, channels }) => dispatch => {
+export const requestStream = ({ axios, chartID, chartMeta, variables, channels, members }) => dispatch => {
     const newUsageRequest = usageStart({ chartMeta, variables });
     const requestID = newUsageRequest.payload.requestID;
     dispatch(newUsageRequest);
@@ -101,6 +101,7 @@ export const requestStream = ({ axios, chartID, chartMeta, variables, channels }
                 chartID,
                 chartMeta,
                 channels,
+                members,
             }));
         }).catch(error => {
             console.log(error);
