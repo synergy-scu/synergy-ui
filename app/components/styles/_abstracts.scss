@@ -9,11 +9,15 @@
     font-size: 0.75em;
 }
 
-.has-help-text {
+.no-margin-bottom {
     margin-bottom: 0 !important;
 }
 
-.help-text {
-    margin-bottom: 1em;
+.block-span {
     display: block;
+    margin-bottom: 0.25em;
+}
+
+.margin-bottom {
+    margin-bottom: 1em;
 }

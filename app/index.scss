@@ -41,6 +41,9 @@ body {
 
             .heading-sidebar {
                 background-color: #001E00;
+                display: flex;
+                justify-content: center;
+                align-items: baseline;
             }
 
             
@@ -80,6 +83,21 @@ body {
 
                 @import './components/styles/settings';
                 @import './components/styles/charts';
+            }
+        }
+    }
+
+    .squarify {
+        padding: .25rem !important;
+        overflow-y: scroll;
+
+        .ui.transparent.input {
+            border-bottom: 1px solid rgba(34, 36, 38, 0.15);
+            padding: .25em;
+            margin-bottom: .5em;
+
+            &:focus-within {
+                border-bottom-color: #767676;
             }
         }
     }

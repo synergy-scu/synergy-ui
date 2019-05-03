@@ -1,4 +1,6 @@
 import { get } from 'lodash';
+import moment from 'moment';
+
 import { ChartTypes, UsageTypes } from '../constants/ChartTypes';
 
 export const normalizeChart = ({ name, chartID, chartType, usageType, options = {}, members, all, created, updated }) => {
@@ -9,11 +11,19 @@ export const normalizeChart = ({ name, chartID, chartType, usageType, options = 
         chartID,
         chartType: get(ChartTypes, chartType.toUpperCase(), ChartTypes.NONE),
         usageType: get(UsageTypes, usageType.toUpperCase(), UsageTypes.NONE),
-        options: options ? JSON.parse(options) : {},
+        options: options ? JSON.parse(options, (key, value) => {
+            if (typeof value === 'string') {
+                const date = moment(value);
+                if (date.isValid()) {
+                    return date;
+                }
+            }
+            return value;
+        }) : {},
         count: members,
         members: [],
         extracted: new Set(),
-        all: all === 1,
+        all: all === 1 || all === true,
         created: new Date(created),
         updated: new Date(updated),
     };
