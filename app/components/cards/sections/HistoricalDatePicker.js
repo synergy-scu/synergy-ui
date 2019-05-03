@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import MomentProps from 'react-moment-proptypes';
 import moment from 'moment';
+
 import { DateRangePicker, isSameDay, isInclusivelyBeforeDay } from 'react-dates';
 
 const START_DATE = 'START_DATE';
@@ -11,17 +13,21 @@ export class HistoricalDatePicker extends React.Component {
         super(props);
 
         this.state = {
-            startDate: null,
-            endDate: null,
             focusedInput: null,
         };
     }
 
-    onDateChange = ({ startDate, endDate }) => {
-        this.setState({
-            startDate,
-            endDate,
-        });
+    static defaultProps = {
+        usePortal: false,
+        startDate: null,
+        endDate: null,
+    };
+
+    static propTypes = {
+        usePortal: PropTypes.bool,
+        startDate: MomentProps.momentObj,
+        endDate: MomentProps.momentObj,
+        onDateChange: PropTypes.func.isRequired,
     };
 
     onFocusChange = focusedInput => {
@@ -36,13 +42,16 @@ export class HistoricalDatePicker extends React.Component {
 
     render() {
         return (
-            <DateRangePicker noBorder withPortal showClearDates
-                startDate={this.state.startDate}
+            <DateRangePicker noBorder hideKeyboardShortcutsPane
+                showClearDates={false}
+                openDirection='up'
+                withPortal={this.props.usePortal}
+                startDate={this.props.startDate}
                 startDateId={START_DATE}
-                endDate={this.state.endDate}
+                endDate={this.props.endDate}
                 endDateId={END_DATE}
-                numberOfMonths={1}
-                onDatesChange={this.onDateChange}
+                numberOfMonths={this.props.usePortal ? 2 : 1}
+                onDatesChange={this.props.onDateChange}
                 focusedInput={this.state.focusedInput}
                 onFocusChange={this.onFocusChange}
                 isOutsideRange={this.isOutsideRange}

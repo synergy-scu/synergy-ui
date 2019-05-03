@@ -1,14 +1,20 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import MomentProps from 'react-moment-proptypes';
 import { Form, Checkbox, Button, Header } from 'semantic-ui-react';
+import { capitalize } from 'lodash';
 
 import { ChartTypes, ChartOptions, ExtendedChartOptions } from '../../../api/constants/ChartTypes';
-import { capitalize } from '../../../api/utils';
+import { HistoricalDatePicker } from './HistoricalDatePicker';
 
 const ChartDropdownOptions = Object.keys(ChartTypes)
     .map(key => {
-        const type = key.toLowerCase();
-        return { key, value: type.toUpperCase(), text: capitalize(type), icon: ChartOptions[key].icon };
+        return {
+            key,
+            value: key.toUpperCase(),
+            text: capitalize(key),
+            icon: ChartOptions[key].icon,
+        };
     }).slice(0, Object.keys(ChartTypes).length - 1);
 
 export const ChartForm = props => {
@@ -18,12 +24,12 @@ export const ChartForm = props => {
         <Form style={{ marginBottom: 0 }}>
             <Header content='Chart Settings' />
             <Form.Input fluid
-                className='has-help-text'
+                className='no-margin-bottom'
                 label='Chart Name'
                 value={props.name}
                 placeholder='Chart Name'
                 onChange={props.onNameChange} />
-            <span className='secondary help-text' style={{ marginLeft: '0.5em' }}>Names must be at least 3 characters long</span>
+            <span className='secondary block-span margin-bottom' style={{ marginLeft: '0.5em' }}>Names must be at least 3 characters long</span>
             <Form.Dropdown fluid selection clearable
                 label='Chart Type'
                 placeholder='Chart Type'
@@ -42,9 +48,19 @@ export const ChartForm = props => {
                     </Form.Field>
                 )
             }
+            <Form.Field className='no-margin-bottom'>
+                <label>Date</label>
+                <HistoricalDatePicker
+                    usePortal={props.isModal}
+                    startDate={props.startDate}
+                    endDate={props.endDate}
+                    onDateChange={props.onDateChange} />
+            </Form.Field>
+            <span className='secondary block-span' style={{ marginLeft: '0.5em' }}>You must choose at least one date</span>
+            <span className='secondary block-span margin-bottom' style={{ marginLeft: '0.5em' }}>Leave one blank to specify all dates before/after</span>
             <Button fluid
                 color='green'
-                content='Create Chart'
+                content={`${capitalize(props.menuType)} Chart`}
                 disabled={props.isSubmitDisabled}
                 onClick={props.onSubmit} />
         </Form>
@@ -52,16 +68,26 @@ export const ChartForm = props => {
 };
 
 ChartForm.defaultProps = {
+    isModal: false,
     isSubmitDisabled: true,
+    startDate: null,
+    endDate: null,
 };
 
 ChartForm.propTypes = {
+    isModal: PropTypes.bool,
     isSubmitDisabled: PropTypes.bool,
+    menuType: PropTypes.PropTypes.oneOf(['create', 'update']).isRequired,
+
     name: PropTypes.string.isRequired,
     selected: PropTypes.oneOf(Object.values(ChartTypes)).isRequired,
     options: PropTypes.objectOf(PropTypes.bool).isRequired,
+    startDate: MomentProps.momentObj,
+    endDate: MomentProps.momentObj,
+
     onNameChange: PropTypes.func.isRequired,
     onSelectChart: PropTypes.func.isRequired,
     onCheckChartOption: PropTypes.func.isRequired,
+    onDateChange: PropTypes.func,
     onSubmit: PropTypes.func.isRequired,
 };
