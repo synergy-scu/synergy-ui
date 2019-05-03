@@ -1,6 +1,12 @@
+import { get } from 'lodash';
+
 import Actions from '../actions';
 
-export const chartsTab = (state = 'view', action) => {
+const chartsTab = type => (state = 'view', action) => {
+    if (get(action, 'meta.type', '') !== type) {
+        return state;
+    }
+
     switch (action.type) {
         case Actions.CHANGE_CHART_TAB:
             return action.payload.tab;
@@ -9,11 +15,22 @@ export const chartsTab = (state = 'view', action) => {
     }
 };
 
-export const isSidebarOpen = (state = false, action) => {
+const isSidebarOpen = type => (state = false, action) => {
+    if (get(action, 'meta.type', '') !== type) {
+        return state;
+    }
+
     switch (action.type) {
         case Actions.SET_SIDEBAR_VISIBILITY:
             return action.payload.isVisible;
         default:
             return state;
     }
+};
+
+export default type => {
+    return {
+        chartsTab: chartsTab(type),
+        isSidebarOpen: isSidebarOpen(type),
+    };
 };

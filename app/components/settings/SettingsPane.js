@@ -10,17 +10,16 @@ export class SettingsPane extends React.Component {
     constructor(props) {
         super(props);
 
-        this.state = {
-        };
+        this.state = {};
     }
 
     static propTypes = {
         activeTab: PropTypes.string.isRequired,
         changeTab: PropTypes.func.isRequired,
-    }
+    };
 
     onTabChange = (event, { name }) => {
-        if (this.props.activeTab !== 'search') {
+        if (this.props.activeTab !== name) {
             this.props.changeTab(name);
         }
     };

@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { Route, Switch, push as changePageAction } from 'react-router-dom';
 import Loadable from 'react-loadable';
 
+import { UsageTypes } from '../api/constants/ChartTypes';
 import { AppLoader } from './loadable/AppLoader';
 import { AppError } from './loadable/AppError';
 
@@ -21,18 +22,32 @@ getLoader.propTypes = {
     retry: PropTypes.func,
 };
 
-export const createLoadable = path => Loadable({
-    loader: () => import(path),
-    loading: getLoader,
-});
+export const createLoadable = (path, props = null) => {
+    const loadable = {
+        loader: () => import(path),
+        loading: getLoader,
+    };
+
+    if (props) {
+        // eslint-disable-next-line react/display-name
+        loadable.render = (loaded, ownProps) => {
+            const Component = loaded.default;
+            return <Component {...props} {...ownProps} />;
+        };
+    }
+
+    return Loadable(loadable);
+};
 
 const AsyncSettingsPane = createLoadable('./settings/SettingsPaneContainer');
-const AsyncChartsPane = createLoadable('./cards/ChartPaneContainer');
+const AsyncChartsPane = createLoadable('./cards/ChartPaneContainer', { usageType: UsageTypes.REALTIME });
+const AsyncHistoryPane = createLoadable('./cards/ChartPaneContainer', { usageType: UsageTypes.HISTORICAL });
 
 export const SynergyRouter = () =>
     <Switch>
         <Route exact path='/' component={AsyncSettingsPane} />
         <Route exact path='/home' component={AsyncChartsPane} />
+        <Route exact path='/history' component={AsyncHistoryPane} />
         <Route exact path='/settings' component={AsyncSettingsPane} />
     </Switch>;
 

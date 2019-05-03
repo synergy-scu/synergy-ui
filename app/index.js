@@ -7,7 +7,7 @@ import { render } from 'react-dom';
 import { Router } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { AxiosProvider } from 'react-axios';
-import 'react-dates/initialize';
+import moment from 'moment';
 
 import SynergyStore from './Store';
 import { Heading } from './components/Heading';
@@ -17,6 +17,10 @@ import ActionCreators from './actions';
 
 import 'semantic-ui-css/semantic.min.css';
 import 'react-dates/lib/css/_datepicker.css';
+
+import 'react-dates/initialize';
+
+// moment.fn.toJSON = () => this.format();
 
 const store = SynergyStore.store;
 const history = SynergyStore.history;
