@@ -1,4 +1,7 @@
 const chartActions = {
+    SET_CHART: 'SET_CHART',
+    SET_CHART_TYPE: 'SET_CHART_TYPE',
+
     CREATE_CHART_START: 'CREATE_CHART_START',
     CREATE_CHART_SUCCESS: 'CREATE_CHART_SUCCESS',
     CREATE_CHART_ERROR: 'CREATE_CHART_ERROR',
@@ -33,17 +36,22 @@ const loginActions = {
 };
 
 const usageActions = {
-    INITIALIZE_USAGE: 'INITIALIZE_USAGE',
     USAGE_START: 'USAGE_START',
     USAGE_SUCCESS: 'USAGE_SUCCESS',
     USAGE_ERROR: 'USAGE_ERROR',
-    USAGE_END: 'USAGE_END',
+};
+
+const usageStreamActions = {
+    USAGE_STREAM_START: 'USAGE_STREAM_START',
+    USAGE_STREAM_SUCCESS: 'USAGE_STREAM_SUCCESS',
+    USAGE_STREAM_ERROR: 'USAGE_STREAM_ERROR',
 };
 
 const queryActions = {
     FETCH_ENTITY_START: 'FETCH_ENTITY_START',
     FETCH_ENTITY_SUCCESS: 'FETCH_ENTITY_SUCCESS',
     FETCH_ENTITY_ERROR: 'FETCH_ENTITY_ERROR',
+    EXTRACT_CHANNELS: 'EXTRACT_CHANNELS',
 };
 
 const queryAllActions = {
@@ -53,6 +61,7 @@ const queryAllActions = {
     FETCH_ALL_SUCCESS: 'FETCH_ALL_SUCCESS',
     FETCH_ALL_ERROR: 'FETCH_ALL_ERROR',
     FETCH_ALL_FINISH: 'FETCH_ALL_FINISH',
+    EXTRACT_ALL_CHANNELS: 'EXTRACT_ALL_CHANNELS',
 };
 
 
@@ -75,6 +84,7 @@ export default {
     ...queryActions,
     ...queryAllActions,
     ...usageActions,
+    ...usageStreamActions,
     ...streamActions,
 
     CHANGE_USER: 'CHANGE_USER',

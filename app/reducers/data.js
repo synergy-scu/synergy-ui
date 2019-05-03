@@ -198,6 +198,7 @@ export const entities = (state = defaultEntities, action) => {
                 devices.set(device.deviceID, {
                     ...device,
                     channels,
+                    extracted: new Set(channels.map(channel => channel.uuid)),
                 });
             });
 
@@ -254,6 +255,7 @@ export const entities = (state = defaultEntities, action) => {
                     items.set(action.payload.uuid, {
                         ...item,
                         channels,
+                        extracted: new Set(channels.map(channel => channel.uuid)),
                     });
 
                     return {
