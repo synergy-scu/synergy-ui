@@ -1,50 +1,89 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Segment, Input, Checkbox, Button, Header, Popup, Grid, Menu, Icon } from 'semantic-ui-react';
-import { escapeRegExp, filter, debounce, orderBy } from 'lodash';
+import { escapeRegExp, filter, debounce, orderBy, capitalize, get } from 'lodash';
 import memoize from 'memoize-one';
 import { isDeepStrictEqual } from 'util';
 
-import { ChartTypes, UsageTypes } from '../../../api/constants/ChartTypes';
-import { capitalize } from '../../../api/utils';
-import { getSortFunctions } from '../../../api/sort';
-import { ChartForm } from '../../cards/sections/ChartForm';
+import { ChartTypes, UsageTypes } from '../../api/constants/ChartTypes';
+import { getSortFunctions } from '../../api/sort';
+import { ChartForm } from '../cards/sections/ChartForm';
 
-export class AddMenu extends React.Component {
+export class EditMenu extends React.Component {
     constructor(props) {
         super(props);
 
-        this.state = {
-            name: '',
+        const members = get(this.props, 'chart.members', []);
 
+        this.state = {
             search: '',
             filterBy: new Set(),
-            selection: new Map(),
-            selectedGroups: new Map(),
-            selectedDevices: new Map(),
 
-            selectedChart: ChartTypes.NONE,
-            chartOptions: {},
-
-            nameError: false,
-            selectionError: false,
-            isErrorVisible: false,
+            name: get(this.props, 'chart.name', ''),
+            selection: new Map(members.length ? members.map(member => [member.uuid, member.type]) : new Map()),
+            selectedGroups: new Map(
+                members.length
+                    ? members.filter(member => member.type === 'group')
+                        .map(member => {
+                            const item = this.props.entities.groups.get(member.uuid);
+                            return [member.uuid, item.extracted];
+                        })
+                    : new Map()
+            ),
+            selectedDevices: new Map(
+                members.length
+                    ? members.filter(member => member.type === 'device')
+                        .map(member => {
+                            const item = this.props.entities.devices.get(member.uuid);
+                            return [member.uuid, item.extracted];
+                        })
+                    : new Map()
+            ),
+            selectedChart: get(this.props, 'chart.chartType', ChartTypes.NONE),
+            chartOptions: get(this.props, 'chart.options', {}),
+            startDate: get(this.props, 'chart.options.startDate', null),
+            endDate: get(this.props, 'chart.options.endDate', null),
         };
     }
 
     static defaultProps = {
+        isModal: false,
         groupType: 'group',
+        menuType: 'create',
+        uuid: '',
     };
 
     static propTypes = {
+        isModal: PropTypes.bool,
+        uuid: PropTypes.string,
+        chart: PropTypes.shape({
+            key: PropTypes.string.isRequired,
+            chartID: PropTypes.string.isRequired,
+            name: PropTypes.string,
+            chartType: PropTypes.oneOf(Object.values(ChartTypes)).isRequired,
+            usageType: PropTypes.oneOf(Object.values(UsageTypes)).isRequired,
+            options: PropTypes.object,
+            count: PropTypes.number.isRequired,
+            members: PropTypes.arrayOf(PropTypes.shape({
+                chartID: PropTypes.string.isRequired,
+                uuid: PropTypes.string.isRequired,
+                type: PropTypes.oneOf(['channel', 'device', 'group']).isRequired,
+                added: PropTypes.instanceOf(Date).isRequired,
+            })).isRequired,
+            all: PropTypes.bool.isRequired,
+            created: PropTypes.instanceOf(Date).isRequired,
+            updated: PropTypes.instanceOf(Date).isRequired,
+        }),
         entities: PropTypes.shape({
             groups: PropTypes.instanceOf(Map).isRequired,
             devices: PropTypes.instanceOf(Map).isRequired,
             channels: PropTypes.instanceOf(Map).isRequired,
+            charts: PropTypes.instanceOf(Map).isRequired,
         }).isRequired,
-        groupType: PropTypes.string.isRequired,
+        groupType: PropTypes.oneOf(['group', 'chart']).isRequired,
+        menuType: PropTypes.oneOf(['create', 'update']).isRequired,
         usageType: PropTypes.oneOf(Object.values(UsageTypes)),
-        create: PropTypes.func.isRequired,
+        submit: PropTypes.func.isRequired,
     };
 
     reset = () => {
@@ -60,20 +99,43 @@ export class AddMenu extends React.Component {
         });
     };
 
-    create = () => {
+    submit = () => {
         if (this.props.groupType === 'group') {
-            this.props.create({
-                name: this.state.name,
-                members: this.state.selection,
-            });
-        } else {
-            this.props.create({
-                name: this.state.name,
-                members: this.state.selection,
-                chartType: this.state.selectedChart,
-                usageType: this.props.usageType,
-                options: this.state.chartOptions,
-            });
+            if (this.props.menuType === 'create') {
+                this.props.submit({
+                    name: this.state.name,
+                    members: this.state.selection,
+                });
+            } else if (this.props.menuType === 'update') {
+                this.props.submit({
+                    groupID: this.props.uuid,
+                    name: this.state.name,
+                    members: this.state.selection,
+                });
+            }
+        } else if (this.props.groupType === 'chart') {
+            if (this.props.menuType === 'create') {
+                this.props.submit({
+                    name: this.state.name,
+                    members: this.state.selection,
+                    chartType: this.state.selectedChart,
+                    usageType: this.props.usageType,
+                    options: this.state.chartOptions,
+                    startDate: this.state.startDate,
+                    endDate: this.state.endDate,
+                });
+            } else if (this.props.menuType === 'update') {
+                this.props.submit({
+                    chartID: this.props.uuid,
+                    name: this.state.name,
+                    members: this.state.selection,
+                    chartType: this.state.selectedChart,
+                    usageType: this.props.usageType,
+                    options: this.state.chartOptions,
+                    startDate: this.state.startDate,
+                    endDate: this.state.endDate,
+                });
+            }
         }
     };
 
@@ -119,7 +181,7 @@ export class AddMenu extends React.Component {
                 this.setState({ selectedGroups: nextMap });
             } else if (item.type === 'device') {
                 const nextMap = new Map(this.state.selectedDevices);
-                nextMap.set(item.uuid, item.channels);
+                nextMap.set(item.uuid, item.extracted);
                 this.setState({ selectedDevices: nextMap });
             }
 
@@ -169,6 +231,13 @@ export class AddMenu extends React.Component {
 
         this.setState({
             chartOptions,
+        });
+    };
+
+    onDateChange = ({ startDate, endDate }) => {
+        this.setState({
+            startDate,
+            endDate,
         });
     };
 
@@ -232,23 +301,16 @@ export class AddMenu extends React.Component {
             });
         });
 
-        const isError = this.state.nameError || this.state.selectionError;
-        const isErrorVisible = isError && this.state.isErrorVisible;
-        const errorContent = [];
-        if (this.state.nameError) {
-            errorContent.push({ type: 'name', message: `${caps} names must be at least 3 characters long and contain no special characters` });
-        }
-        if (this.state.selectionError) {
-            errorContent.push({ type: 'selection', message: `You must select at least one ${this.props.groupType} member. Select ${this.props.groupType} members below` });
-        }
-
         const isGroupDisabled = this.state.name.length < 3
             || !this.state.selection.size
             || this.state.selection.size === 1 && this.state.selectedGroups.size === 1;
-        const isChartDisabled = !this.state.selection.size
-            || !this.state.name.length
+        let isChartDisabled = this.state.name.length < 3
+            || !this.state.selection.size
             || this.state.selectedChart === ChartTypes.NONE;
 
+        isChartDisabled = this.props.usageType === UsageTypes.HISTORICAL ? isChartDisabled || !this.state.startDate && !this.state.endDate : isChartDisabled;
+
+        console.log(!this.state.selection.size, this.state.name.length < 3, this.state.selectedChart === ChartTypes.NONE, !this.state.startDate, !this.state.endDate);
         return (
             <Grid>
                 <Grid.Column width={isForGroups ? 5 : 4} className='squarify'>
@@ -288,28 +350,19 @@ export class AddMenu extends React.Component {
                             <Segment>
                                 <Input fluid placeholder={`${caps} Name`} value={this.state.name} error={this.state.nameError} onChange={this.onNameChange} />
                                 <span className='secondary' style={{ marginLeft: '0.5em' }}>Names must be at least 3 characters long</span>
-                                <Popup
-                                    open={isErrorVisible}
-                                    disabled={!isErrorVisible}
-                                    trigger={
-                                        <Button fluid
-                                            disabled={isGroupDisabled}
-                                            content={`Create ${caps}`}
-                                            positive={!isErrorVisible}
-                                            negative={isErrorVisible}
-                                            onClick={this.create}
-                                            style={{ marginTop: '1em' }} />}
-                                    content={errorContent.map(item =>
-                                        <p key={item.type}>{item.message}</p>
-                                    )} />
+                                <Button fluid
+                                    disabled={isGroupDisabled}
+                                    content={`Create ${caps}`}
+                                    onClick={this.create}
+                                    style={{ marginTop: '1em' }} />
                             </Segment>
                     }
                 </Grid.Column>
                 <Grid.Column width={isForGroups ? 11 : 7} className='squarify'>
                     <Segment className="add-menu">
-                        <Header content={`Select ${caps} Members`} className='has-help-text' />
-                        <span className='secondary' style={{ display: 'block' }}>You must select at least 1 item</span>
-                        { this.props.groupType === 'group' && <span className='secondary help-text'>The sole member of a group cannot be another group</span> }
+                        <Header content={`Select ${caps} Members`} className='no-margin-bottom' />
+                        <span className='secondary block-span'>You must select at least 1 item</span>
+                        { this.props.groupType === 'group' && <span className='secondary block-span margin-bottom'>The sole member of a group cannot be another group</span> }
                         <Segment.Group>
                             {filtered.map(item => {
                                 const isDisabled = disabledItems.has(item.uuid);
@@ -334,14 +387,19 @@ export class AddMenu extends React.Component {
                         <Grid.Column width={5} className='squarify'>
                             <Segment>
                                 <ChartForm
+                                    isModal={this.props.isModal}
+                                    menuType={this.props.menuType}
                                     name={this.state.name}
                                     selected={this.state.selectedChart}
                                     options={this.state.chartOptions}
+                                    startDate={this.state.startDate}
+                                    endDate={this.state.endDate}
                                     onNameChange={this.onNameChange}
                                     onSelectChart={this.onSelectChart}
                                     onCheckChartOption={this.onCheckChartOption}
+                                    onDateChange={this.onDateChange}
                                     isSubmitDisabled={isChartDisabled}
-                                    onSubmit={this.create} />
+                                    onSubmit={this.submit} />
                             </Segment>
                         </Grid.Column>
                 }

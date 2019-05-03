@@ -1,22 +1,26 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Button, Grid, Statistic } from 'semantic-ui-react';
-import { ResponsiveLine, Line } from '@nivo/line';
-import { AutoSizer } from 'react-virtualized';
 import memoize from 'memoize-one';
 import moment from 'moment';
-import { maxBy, last } from 'lodash';
+import { maxBy } from 'lodash';
 import { timeFormat } from 'd3-time-format';
 
+import { Button, Grid, Statistic } from 'semantic-ui-react';
+import { Line } from '@nivo/line';
+import { AutoSizer } from 'react-virtualized';
+
+import { EditMenuModal } from '../../editor/EditMenuModal';
 import { lineChart } from '../../../api/charts';
 import { ChartTypes, UsageTypes } from '../../../api/constants/ChartTypes';
-import { millisToHours, ampsTokWh, stripLongDecimal, calculateKWHs, calculateAverage, calculateCost } from '../../../api/socket/usageUtils';
+import { stripLongDecimal, calculateKWHs, calculateAverage, calculateCost } from '../../../api/socket/usageUtils';
 
 export class LineChart extends React.Component {
     constructor(props) {
         super(props);
 
-        this.state = {};
+        this.state = {
+            isEditModalOpen: false,
+        };
 
         this.formatTime = timeFormat('%I:%M% %p');
     }
@@ -57,12 +61,18 @@ export class LineChart extends React.Component {
         }),
         disconnect: PropTypes.func.isRequired,
         fetchUsage: PropTypes.func.isRequired,
-    }
+    };
+
+    toggleModal = () => {
+        this.setState({
+            isEditModalOpen: !this.state.isEditModalOpen,
+        });
+    };
 
     getPoints = memoize((points, stacked) => lineChart(points, 60, stacked));
 
     render() {
-        const { chart, stream } = this.props;
+        const { stream } = this.props;
         const points = this.getPoints(stream.results, false);
         let maxY = points.length ? maxBy(points, 'y').y * 3 : 1;
         maxY = maxY > 0 ? maxY : 1;
@@ -82,6 +92,12 @@ export class LineChart extends React.Component {
                         this.props.user.cost && this.props.user.cost > 0 &&
                             <Statistic size='mini' label='USD' value={stripLongDecimal(cost)} style={{ margin: 0 }} />
                     }
+                    <EditMenuModal isChart
+                        isOpen={this.state.isEditModalOpen}
+                        uuid={this.props.chartID}
+                        menuType='update'
+                        groupType='chart'
+                        toggleModal={this.toggleModal} />
                 </Grid.Column>
                 <Grid.Column width={14}>
                     <AutoSizer>
@@ -90,7 +106,7 @@ export class LineChart extends React.Component {
                                 height={height}
                                 width={width}
                                 data={[{ id: this.props.chartID, data: points }]}
-                                margin={{ top: 0, right: 0, bottom: 30, left: 60 }}
+                                margin={{ top: 10, right: 0, bottom: 30, left: 60 }}
                                 xScale={{ type: 'time', format: '%Q' }}
                                 yScale={{ type: 'linear', min: 0, max: maxY }}
                                 enableGridX={false}

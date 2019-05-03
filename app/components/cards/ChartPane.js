@@ -4,7 +4,7 @@ import { Sidebar, Menu, Icon, Segment, Popup } from 'semantic-ui-react';
 import memoize from 'memoize-one';
 import { isDeepStrictEqual } from 'util';
 
-import { ChartTypes, UsageTypes } from '../../api/constants/ChartTypes';
+import { ChartTypes, UsageTypes, ExtendedUsageOptions } from '../../api/constants/ChartTypes';
 
 import createChart from './charts/ChartContainer';
 import { LineChart } from './charts/LineChart';
@@ -13,7 +13,7 @@ import { BarChart } from './charts/BarChart';
 import { BurstChart } from './charts/BurstChart';
 import { NoChart } from './charts/NoChart';
 import { ChartSidebar } from './ChartSidebar';
-import AddMenuContainer from './AddMenuContainer';
+import EditMenuContainer from '../editor/EditMenuContainer';
 
 export class ChartPane extends React.Component {
     constructor(props) {
@@ -26,6 +26,7 @@ export class ChartPane extends React.Component {
     }
 
     static propTypes = {
+        usageType: PropTypes.oneOf(Object.values(UsageTypes)).isRequired,
         entities: PropTypes.shape({
             charts: PropTypes.instanceOf(Map).isRequired,
         }).isRequired,
@@ -33,6 +34,7 @@ export class ChartPane extends React.Component {
         changeTab: PropTypes.func.isRequired,
         isSidebarOpen: PropTypes.bool.isRequired,
         toggleSidebar: PropTypes.func.isRequired,
+        fetchUsage: PropTypes.func.isRequired,
     };
 
     reset = () => {
@@ -42,11 +44,14 @@ export class ChartPane extends React.Component {
         });
     };
 
-    selectChart = ({ chartID, chartType }) => {
+    selectChart = chart => {
         this.setState({
-            selectedChart: chartID,
-            selectedType: chartType,
+            selectedChart: chart.chartID,
+            selectedType: chart.chartType,
         });
+        if (this.props.usageType === UsageTypes.HISTORICAL) {
+            this.props.fetchUsage(chart);
+        }
         this.props.changeTab('view');
         this.props.toggleSidebar(false);
     };
@@ -67,10 +72,12 @@ export class ChartPane extends React.Component {
     }, isDeepStrictEqual);
 
     onTabChange = (event, { name }) => {
-        if (name === 'menu') {
-            this.props.toggleSidebar(true);
-        } else {
-            this.props.changeTab(name);
+        if (this.props.activeTab !== name) {
+            if (name === 'menu') {
+                this.props.toggleSidebar(true);
+            } else {
+                this.props.changeTab(name);
+            }
         }
     };
 
@@ -78,10 +85,10 @@ export class ChartPane extends React.Component {
 
         const chart = this.props.entities.charts.get(this.state.selectedChart) || {};
         const ChartContainer = createChart(this.chartSwitcher(chart));
-        const Component = this.props.activeTab === 'view' ? ChartContainer : AddMenuContainer;
+        const Component = this.props.activeTab === 'view' ? ChartContainer : EditMenuContainer;
         const componentProps = this.props.activeTab === 'view'
             ? { chartID: this.state.selectedChart }
-            : { groupType: 'chart', usageType: UsageTypes.REALTIME };
+            : { menuType: 'create', groupType: 'chart', usageType: this.props.usageType };
 
         const chartPath = ` >> ${this.props.entities.charts.has(this.state.selectedChart) ? this.props.entities.charts.get(this.state.selectedChart).name || 'Unnamed Chart' : 'Unnamed Chart'}`;
 
@@ -89,7 +96,7 @@ export class ChartPane extends React.Component {
             <Sidebar.Pushable>
                 <ChartSidebar
                     isMenuVisible={this.props.isSidebarOpen}
-                    charts={[...this.props.entities.charts.values()]}
+                    charts={[...this.props.entities.charts.values()].filter(item => item.usageType === this.props.usageType)}
                     toggleSidebar={this.props.toggleSidebar}
                     selectChart={this.selectChart}
                     selected={this.state.selectedChart} />
@@ -101,7 +108,7 @@ export class ChartPane extends React.Component {
                             onClick={this.onTabChange}>
                             <Icon name='bars' />
                         </Menu.Item>
-                        <Menu.Item content={this.props.activeTab === 'view' ? `View${this.state.selectedChart.length ? chartPath : ''}` : 'Create Chart'} />
+                        <Menu.Item content={this.props.activeTab === 'view' ? `View ${ExtendedUsageOptions[this.props.usageType].verbiage.capitalized}${this.state.selectedChart.length ? chartPath : ''}` : `Create ${ExtendedUsageOptions[this.props.usageType].verbiage.capitalized} Chart`} />
                         <Menu.Menu position='right'>
                             <Menu.Item link
                                 name='view'

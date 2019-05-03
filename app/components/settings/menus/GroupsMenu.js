@@ -1,11 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Grid, Segment, Accordion, Button, Icon, Modal } from 'semantic-ui-react';
+import { Grid, Segment, Accordion, Button, Icon } from 'semantic-ui-react';
 
 import { EntityMenu } from '../sections/EntityMenu';
 import { GroupAccordion } from '../sections/GroupAccordion';
-import SettingsTabContainer from '../SettingsTabContainer';
-import { AddMenu } from './AddMenu';
+import { EditMenuModal } from '../../editor/EditMenuModal';
 
 import { capitalize } from '../../../api/utils';
 import { sortByStringProperty } from '../../../api/sort';
@@ -80,7 +79,7 @@ export class GroupsMenu extends React.Component {
         });
     };
 
-    toggleAddModal = () => {
+    toggleCreateModal = () => {
         this.setState({
             isModalOpen: !this.state.isModalOpen,
         });
@@ -99,29 +98,14 @@ export class GroupsMenu extends React.Component {
             }
         }
 
-        const AddMenuContainer = SettingsTabContainer(AddMenu);
-
         return (
             <Grid>
                 <Grid.Column width={5} className="squarify">
-                    <Modal centered
-                        size='large'
-                        open={this.state.isModalOpen}
-                        closeOnDimmerClick={false}
-                        closeOnEscape={false}
-                        closeIcon={<Icon link name='close' onClick={this.toggleAddModal} />}
-                        trigger={
-                            <Button fluid
-                                color='green'
-                                content='Create New Group'
-                                onClick={this.toggleAddModal}
-                                style={{ marginBottom: '1em' }} />
-                        }>
-                        <Modal.Header>Create Group</Modal.Header>
-                        <Modal.Content scrolling>
-                            <AddMenuContainer groupType='group' />
-                        </Modal.Content>
-                    </Modal>
+                    <EditMenuModal
+                        menuType='create'
+                        groupType='group'
+                        isOpen={this.state.isModalOpen}
+                        toggleModal={this.toggleCreateModal} />
                     <EntityMenu
                         entityType="group"
                         activeItem={this.props.activeGroup}
