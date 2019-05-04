@@ -41,7 +41,7 @@ export const historyCharts = (state = new Map(), action) => {
             const startDate = action.payload.variables.startDate || moment('2019-01-01');
             const endDate = action.payload.variables.endDate || moment();
 
-            const chartDuration = moment.duration(endDate.diff(startDate));
+            const chartDuration = moment.duration(Math.abs(endDate.diff(startDate)));
             let splitDurationPeriod = 'd';
             if (chartDuration.asYears() >= 2) {
                 splitDurationPeriod = 'y';
@@ -75,44 +75,44 @@ export const historyCharts = (state = new Map(), action) => {
             const lastTimestamps = new Map();
             const lastGroupedTimestamps = new Map();
 
-            action.payload.data.results.forEach(({ channelID, amps, time }) => {
+            action.payload.data.results.slice(0, 2).forEach(({ channelID, amps, time }) => {
                 const start = moment(startDate);
-                const parentID = action.payload.reverseLookup.get(channelID);
 
                 const timestamp = moment(time);
-                const timePeriodCount = moment.duration(startDate.diff(timestamp)).as(chart.splitDurationPeriod);
+                const timePeriodCount = moment.duration(Math.abs(startDate.diff(timestamp))).as(chart.splitDurationPeriod);
                 const timePeriod = moment(start.add(timePeriodCount, chart.splitDurationPeriod));
                 const endOfPeriod = timePeriod.endOf(chart.splitDurationPeriod);
 
-                const period = results.get(endOfPeriod) || {};
+                const period = results.get(endOfPeriod.valueOf()) || {};
                 const channels = new Map(period.channels || new Map());
                 const channelTotal = (channels.get(channelID) || 0) + amps;
                 channels.set(channelID, channelTotal);
-                results.set(endOfPeriod, {
+                results.set(endOfPeriod.valueOf(), {
                     time: endOfPeriod,
                     channels,
                 });
 
-                const groupedPeriod = groupedResults.get(endOfPeriod) || {};
+                const parentID = action.payload.reverseLookup.get(channelID);
+                const groupedPeriod = groupedResults.get(endOfPeriod.valueOf()) || {};
                 const members = new Map(groupedPeriod.members || new Map());
                 const parentTotal = (members.get(parentID) || 0) + amps;
                 members.set(parentID, parentTotal);
-                groupedResults.set(endOfPeriod, {
+                groupedResults.set(endOfPeriod.valueOf(), {
                     time: endOfPeriod,
                     members,
                 });
 
-                const lastTimestamp = lastTimestamps.get(channelID);
+                const lastTimestamp = lastTimestamps.get(channelID) || timestamp;
                 const prevDuration = (chart.timers.get(channelID) || moment.duration(500)).asMilliseconds();
                 lastTimestamps.set(channelID, timestamp);
 
-                const lastGroupedTimestamp = lastTimestamps.get(parentID);
+                const lastGroupedTimestamp = lastTimestamps.get(parentID) || timestamp;
                 const prevGroupedDuration = (chart.groupedTimers.get(parentID) || moment.duration(500)).asMilliseconds();
                 lastGroupedTimestamps.set(parentID, timestamp);
 
                 if (amps > 0) {
-                    chart.timers.set(channelID, moment.duration(prevDuration + timestamp.diff(lastTimestamp)));
-                    chart.groupedTimers.set(parentID, moment.duration(prevGroupedDuration + timestamp.diff(lastGroupedTimestamp)));
+                    chart.timers.set(channelID, moment.duration(prevDuration + Math.abs(timestamp.diff(lastTimestamp))));
+                    chart.groupedTimers.set(parentID, moment.duration(prevGroupedDuration + Math.abs(timestamp.diff(lastGroupedTimestamp))));
                 }
             });
 
@@ -121,7 +121,7 @@ export const historyCharts = (state = new Map(), action) => {
             chart.channelResults = [...results.values()];
             chart.groupedResults = [...groupedResults.values()];
 
-            console.log(chart);
+            // console.log(chart);
 
             nextState.set(action.payload.chartID, defaultChart({ ...cloneDeep(chart) }));
 
