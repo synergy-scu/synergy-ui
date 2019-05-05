@@ -1,26 +1,39 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Button, Grid } from 'semantic-ui-react';
-import { ResponsivePie } from '@nivo/pie';
 import memoize from 'memoize-one';
-import moment from 'moment';
+import { isDeepStrictEqual } from 'util';
 
-import { pieChart } from '../../../api/charts';
+import { Grid, Statistic, Button } from 'semantic-ui-react';
+import { AutoSizer } from 'react-virtualized';
+import { Pie } from '@nivo/pie';
+
+import { EditMenuModal } from '../../editor/EditMenuModal';
 import { ChartTypes, UsageTypes } from '../../../api/constants/ChartTypes';
+import { stripLongDecimal, calculateKWHs, calculateAverage, calculateCost } from '../../../api/socket/usageUtils';
+import { pieProps, donutProps, noDataProps } from '../../../api/charts/pie/pieProps';
+import { pieChartReal, pieChartHistory } from '../../../api/charts/pie/generator';
+
 
 export class PieChart extends React.Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            streamID: null,
+            isEditModalOpen: false,
         };
     }
 
     static propTypes = {
-        chartID: PropTypes.string.isRequired,
+        user: PropTypes.shape({
+            cost: PropTypes.number,
+        }),
+        usageType: PropTypes.oneOf(Object.values(UsageTypes)).isRequired,
+        entities: PropTypes.shape({
+            names: PropTypes.instanceOf(Map).isRequired,
+        }).isRequired,
         chart: PropTypes.shape({
             key: PropTypes.string.isRequired,
+            uuid: PropTypes.string.isRequired,
             chartID: PropTypes.string.isRequired,
             name: PropTypes.string,
             chartType: PropTypes.oneOf(Object.values(ChartTypes)).isRequired,
@@ -37,68 +50,78 @@ export class PieChart extends React.Component {
             created: PropTypes.instanceOf(Date).isRequired,
             updated: PropTypes.instanceOf(Date).isRequired,
         }).isRequired,
-        stream: PropTypes.shape({
-            chartID: PropTypes.string.isRequired,
-            streamID: PropTypes.string.isRequired,
-            channels: PropTypes.arrayOf(PropTypes.string).isRequired,
-            socket: PropTypes.object,
-            connected: PropTypes.bool.isRequired,
-            results: PropTypes.arrayOf(PropTypes.shape({
-                time: PropTypes.instanceOf(moment),
-                channels: PropTypes.instanceOf(Map),
-            })).isRequired,
-        }),
-        entities: PropTypes.shape({
-            channels: PropTypes.instanceOf(Map).isRequired,
-        }),
-        disconnect: PropTypes.func.isRequired,
-        fetchUsage: PropTypes.func.isRequired,
+        // chartSet: PropTypes.shape(this.props.usageType === UsageTypes.REALTIME ? streamChartProps : historyChartProps).isRequired,
+        refresh: PropTypes.func.isRequired,
+        pauseStream: PropTypes.func.isRequired,
     };
 
-    getPoints = memoize((points, channelMap, pieType) => pieChart(points, channelMap, pieType));
+    toggleModal = () => {
+        this.setState({
+            isEditModalOpen: !this.state.isEditModalOpen,
+        });
+    };
+
+    pauseStream = () => {
+        if (this.props.usageType === UsageTypes.REALTIME) {
+            this.props.pauseStream(this.props.chart.chartID, !this.props.chartSet.paused);
+        }
+    };
+
+    getPoints = memoize((chartSet, isRealtime) =>
+        isRealtime
+            ? pieChartReal(chartSet.results, this.props.entities.names, false)
+            : pieChartHistory(chartSet.results, this.props.entities.names, false)
+    , isDeepStrictEqual);
 
     render() {
-        const { chart, stream } = this.props;
+        const { chart, chartSet } = this.props;
+        const isRealtime = this.props.usageType === UsageTypes.REALTIME;
 
-        const points = this.getPoints(stream.results, this.props.entities.channels, chart.chartType);
+        const slices = this.getPoints(chartSet, false);
+        const isEmpty = Array.isArray(slices) && Boolean(slices.length === 1) && slices[0].id === 'empty';
+
+        const kWhs = calculateKWHs(calculateAverage(chartSet.channels, chartSet.results), chartSet.timers);
+        const cost = calculateCost(kWhs, this.props.user.cost);
+
+        let isStreaming = false;
+        if (isRealtime) {
+            isStreaming = chartSet.connected && !chartSet.paused;
+        }
 
         return (
-            <Grid columns={2}>
-                <Grid.Column width={2}>
-                    <Button.Group vertical>
-                        {/* <Button content='Stream' onClick={this.props.fetchUsage} disabled={stream.connected} /> */}
-                        {/* <Button content='Disconnect' onClick={this.props.disconnect} disabled={!stream.connected} /> */}
-                    </Button.Group>
+            <Grid columns={2} style={{ height: '110%', padding: '1em' }}>
+                <Grid.Column width={3} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                    {
+                        this.props.usageType === UsageTypes.REALTIME
+                            ? <Button icon={isStreaming ? 'pause' : 'play'} onClick={this.pauseStream} />
+                            : <Button fluid icon='sync' onClick={this.props.refresh} />
+                    }
+                    <Statistic size='mini' label='kWh' value={stripLongDecimal(kWhs)} />
+                    {
+                        this.props.user.cost && this.props.user.cost > 0 &&
+                        <Statistic size='mini' label='USD' value={stripLongDecimal(cost)} style={{ margin: 0 }} />
+                    }
+                    <EditMenuModal isChart
+                        isOpen={this.state.isEditModalOpen}
+                        uuid={this.props.chart.uuid}
+                        menuType='update'
+                        groupType='chart'
+                        toggleModal={this.toggleModal} />
                 </Grid.Column>
-                <Grid.Column width={14}>
-                    <ResponsivePie
-                        data={points}
-                        margin={{ top: 20, right: 20, bottom: 100, left: 60 }}
-                        innerRadius={0.2}
-                        padAngle={0.7}
-                        cornerRadius={3}
-                        slicesLabelsSkipAngle={10}
-                        radialLabel={segment => segment.label} />
-                    {/* legends={[
-                            {
-                                anchor: 'bottom-right',
-                                direction: 'column',
-                                itemTextColor: '#999',
-                                symbolShape: 'circle',
-                                // legendFormat: segment => segment.label,
-                                effects: [
-                                    {
-                                        on: 'hover',
-                                        style: {
-                                            itemTextColor: '#000',
-                                        },
-                                    },
-                                ],
-                            },
-                        ]} /> */}
+                <Grid.Column width={13}>
+                    <AutoSizer>
+                        {({ height, width }) =>
+                            <Pie
+                                {...pieProps}
+                                {...chart.options.donut ? donutProps : {}}
+                                {...isEmpty ? noDataProps : {}}
+                                height={height}
+                                width={width}
+                                data={slices} />
+                        }
+                    </AutoSizer>
                 </Grid.Column>
             </Grid>
-
         );
     }
 }

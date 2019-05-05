@@ -26,8 +26,6 @@ export class LineChart extends React.Component {
         this.state = {
             isEditModalOpen: false,
         };
-
-        this.formatTime = timeFormat('%I:%M% %p');
     }
 
     static propTypes = {

@@ -176,6 +176,7 @@ export const entities = (state = defaultEntities, action) => {
 
                         return {
                             ...state,
+                            names,
                             [action.payload.entityType]: items,
                         };
                     }
@@ -200,6 +201,7 @@ export const entities = (state = defaultEntities, action) => {
                     }
                     return {
                         ...state,
+                        names,
                         [action.payload.entityType]: items,
                     };
                 default:

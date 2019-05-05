@@ -30,7 +30,7 @@ export const ChartOptions = {
             toLower: 'pie',
             capitalized: 'Pie',
         },
-        options: new Map([['donut', 'Display Donut'], ['showUsage', 'Show Member Usage']]),
+        options: new Map([['donut', 'Display As Donut'], ['showUsage', 'Show Member Usage']]),
         type: ChartTypes.PIE,
         icon: 'chart pie',
     },
