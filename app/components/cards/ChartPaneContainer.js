@@ -19,14 +19,16 @@ export const mapDispatch = dispatch => {
     return {
         changeTab: (type, tab) => dispatch(ActionCreators.changeChartTab(type, tab)),
         toggleSidebar: (type, isVisible) => dispatch(ActionCreators.setSidebarVisibility(type, isVisible)),
-        fetchUsage: chartParams => dispatch(ActionCreators.requestUsage(chartParams)),
+        changeChart: (type, chart) => dispatch(ActionCreators.changeChart(type, chart)),
+        requestHistory: chartParams => dispatch(ActionCreators.requestHistory(chartParams)),
+        requestStream: chartParams => dispatch(ActionCreators.requestStream(chartParams)),
     };
 };
 
 export const mergeProps = (stateProps, dispatchProps, ownProps) => {
     const chartSettings = ownProps.usageType === UsageTypes.REALTIME ? stateProps.realtime : stateProps.historical;
 
-    const fetchUsage = chart => {
+    const requestChart = chart => {
         const members = extractGroupedMembers(chart.members, stateProps.entities);
         const channels = getChannelsFromGroup(members);
 
@@ -39,12 +41,14 @@ export const mergeProps = (stateProps, dispatchProps, ownProps) => {
             variables.endDate = chart.options.endDate;
         }
 
-        return dispatchProps.fetchUsage({
+        const requestFn = ownProps.usageType === UsageTypes.REALTIME ? dispatchProps.requestStream : dispatchProps.requestHistory;
+        return requestFn({
             axios: ownProps.axios,
             chartID: chart.chartID,
             chartMeta: {
                 chartType: chart.chartType,
                 usageType: chart.usageType,
+                ...chart.options,
             },
             variables,
             channels: [...channels.values()],
@@ -58,10 +62,12 @@ export const mergeProps = (stateProps, dispatchProps, ownProps) => {
         ...ownProps,
         activeTab: chartSettings.chartsTab,
         isSidebarOpen: chartSettings.isSidebarOpen,
-        fetchUsage,
+        selectedChart: chartSettings.selectedChart,
+        requestChart,
 
         changeTab: tab => dispatchProps.changeTab(ownProps.usageType, tab),
         toggleSidebar: isVisible => dispatchProps.toggleSidebar(ownProps.usageType, isVisible),
+        changeChart: chart => dispatchProps.changeChart(ownProps.usageType, chart),
     };
 };
 

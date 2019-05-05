@@ -1,3 +1,5 @@
+import { capitalize } from 'lodash';
+
 import Actions from '../actions';
 import { normalize, extractChannels } from '../api/normalize/normalize';
 import { fetchAllRequest, entityRequest, fetchRequest } from '../api/requests';
@@ -143,8 +145,16 @@ export const currentRequest = (state = fetchAllRequest({}), action) => {
     }
 };
 
-const defaultEntities = { groups: new Map(), devices: new Map(), channels: new Map(), charts: new Map() };
+const defaultEntities = {
+    groups: new Map(),
+    devices: new Map(),
+    channels: new Map(),
+    charts: new Map(),
+    reminders: new Map(),
+    names: new Map(),
+};
 export const entities = (state = defaultEntities, action) => {
+    const names = new Map(state.names);
     switch (action.type) {
         case Actions.FETCH_ENTITY_SUCCESS:
         case Actions.FETCH_ALL_SUCCESS: {
@@ -153,10 +163,15 @@ export const entities = (state = defaultEntities, action) => {
             switch (action.payload.entityType) {
                 case 'channels':
                 case 'devices':
+                case 'reminders':
                     if (Array.isArray(action.payload.data)) {
                         action.payload.data.forEach(entity => {
                             const normalizedEntity = normalize(entity, action.payload.entityType);
                             items.set(normalizedEntity.key, normalizedEntity);
+
+                            if (action.payload.entityType === 'channels' || action.payload.entityType === 'devices') {
+                                names.set(normalizedEntity.key, normalizedEntity.name || `Unnamed ${capitalize(action.payload.entityType).substring(0, action.payload.entityType - 1)}`);
+                            }
                         });
 
                         return {
@@ -172,6 +187,7 @@ export const entities = (state = defaultEntities, action) => {
                         action.payload.data[action.payload.entityType].forEach(parent => {
                             const normalizedEntity = normalize(parent, action.payload.entityType);
                             items.set(normalizedEntity.key, normalizedEntity);
+                            names.set(normalizedEntity.key, normalizedEntity.name || `Unnamed ${capitalize(action.payload.entityType).substring(0, action.payload.entityType - 1)}`);
                         });
                     }
 
@@ -225,11 +241,22 @@ export const entities = (state = defaultEntities, action) => {
                 });
             });
 
+            const reminders = new Map(state.reminders);
+            state.reminders.forEach(reminder => {
+                if (state.channels.has(reminder.channelID)) {
+                    reminders.set(reminder.uuid, {
+                        ...reminder,
+                        channel: state.channels.get(reminder.channelID),
+                    });
+                }
+            });
+
             return {
                 ...state,
                 devices,
                 groups,
                 charts,
+                reminders,
             };
         }
         case Actions.EXTRACT_CHANNELS: {
@@ -257,6 +284,21 @@ export const entities = (state = defaultEntities, action) => {
                         channels,
                         extracted: new Set(channels.map(channel => channel.uuid)),
                     });
+
+                    return {
+                        ...state,
+                        [action.payload.entityType]: items,
+                    };
+                }
+                case 'reminders': {
+                    const item = items.get(action.payload.uuid);
+
+                    if (state.channels.has(item.channelID)) {
+                        items.set(action.payload.uuid, {
+                            ...item,
+                            channel: state.channels.get(item.channelID),
+                        });
+                    }
 
                     return {
                         ...state,

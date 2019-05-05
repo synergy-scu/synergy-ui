@@ -1,6 +1,7 @@
 import { GroupsMenu } from './GroupsMenu';
 import { DevicesMenu } from './DevicesMenu';
 import { ChannelsMenu } from './ChannelsMenu';
+import { ReminderMenu } from './ReminderMenu';
 
 export default {
     group: {
@@ -17,5 +18,10 @@ export default {
         menuItem: 'Channels',
         component: ChannelsMenu,
         name: 'channel',
+    },
+    reminder: {
+        menuItem: 'Reminders',
+        component: ReminderMenu,
+        name: 'reminder',
     },
 };

@@ -6,6 +6,7 @@ import * as EntityActions from './entities';
 import * as GroupActions from './groups';
 import * as LoginActions from './login';
 import * as QueryAllActions from './queryAll';
+import * as ReminderActions from './reminders';
 import * as SettingsActions from './settings';
 import * as StreamActions from './stream';
 import * as UsageActions from './usage';
@@ -19,6 +20,7 @@ export default {
     ...GroupActions,
     ...LoginActions,
     ...QueryAllActions,
+    ...ReminderActions,
     ...SettingsActions,
     ...StreamActions,
     ...UsageActions,

@@ -1,18 +1,23 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import memoize from 'memoize-one';
-import moment from 'moment';
-import { maxBy } from 'lodash';
 import { timeFormat } from 'd3-time-format';
+import { isDeepStrictEqual } from 'util';
 
-import { Button, Grid, Statistic } from 'semantic-ui-react';
-import { Line } from '@nivo/line';
+import { Grid, Statistic, Button } from 'semantic-ui-react';
 import { AutoSizer } from 'react-virtualized';
 
 import { EditMenuModal } from '../../editor/EditMenuModal';
-import { lineChart } from '../../../api/charts';
+import { RealtimeLine, HistoricalLine } from './nivo/Line';
+
+import { lineChart, stackedLineChart } from '../../../api/charts/line/generator';
+import { getTimeFormat } from '../../../api/charts/line/lineProps';
+import { historyChartProps, streamChartProps } from '../../../api/chartProps';
 import { ChartTypes, UsageTypes } from '../../../api/constants/ChartTypes';
 import { stripLongDecimal, calculateKWHs, calculateAverage, calculateCost } from '../../../api/socket/usageUtils';
+import { getMaxY } from '../../../api/charts/line/lineProps';
+
+const MAX_POINTS = 60;
 
 export class LineChart extends React.Component {
     constructor(props) {
@@ -29,9 +34,10 @@ export class LineChart extends React.Component {
         user: PropTypes.shape({
             cost: PropTypes.number,
         }),
-        chartID: PropTypes.string.isRequired,
+        usageType: PropTypes.oneOf(Object.values(UsageTypes)).isRequired,
         chart: PropTypes.shape({
             key: PropTypes.string.isRequired,
+            uuid: PropTypes.string.isRequired,
             chartID: PropTypes.string.isRequired,
             name: PropTypes.string,
             chartType: PropTypes.oneOf(Object.values(ChartTypes)).isRequired,
@@ -48,20 +54,16 @@ export class LineChart extends React.Component {
             created: PropTypes.instanceOf(Date).isRequired,
             updated: PropTypes.instanceOf(Date).isRequired,
         }).isRequired,
-        stream: PropTypes.shape({
-            chartID: PropTypes.string.isRequired,
-            streamID: PropTypes.string.isRequired,
-            channels: PropTypes.arrayOf(PropTypes.string).isRequired,
-            socket: PropTypes.object,
-            connected: PropTypes.bool.isRequired,
-            results: PropTypes.arrayOf(PropTypes.shape({
-                time: PropTypes.instanceOf(moment),
-                channels: PropTypes.instanceOf(Map),
-            })).isRequired,
-        }),
-        disconnect: PropTypes.func.isRequired,
-        fetchUsage: PropTypes.func.isRequired,
+        // chartSet: PropTypes.shape(this.props.usageType === UsageTypes.REALTIME ? streamChartProps : historyChartProps).isRequired,
+        refresh: PropTypes.func.isRequired,
+        pauseStream: PropTypes.func.isRequired,
     };
+
+    componentWillUnmount() {
+        if (this.props.chart.usageType === UsageTypes.REALTIME && this.props.chartSet.connected) {
+            // this.props.chartSet.socket.disconnect();
+        }
+    }
 
     toggleModal = () => {
         this.setState({
@@ -69,24 +71,44 @@ export class LineChart extends React.Component {
         });
     };
 
-    getPoints = memoize((points, stacked) => lineChart(points, 60, stacked));
+    pauseStream = () => {
+        if (this.props.usageType === UsageTypes.REALTIME) {
+            this.props.pauseStream(this.props.chart.chartID, !this.props.chartSet.paused);
+        }
+    };
+
+    getPoints = memoize((chartSet, stacked) =>
+        !stacked
+            ? lineChart(chartSet.chartID, chartSet.results, MAX_POINTS)
+            : stackedLineChart(chartSet.groupedResults, MAX_POINTS, true)
+    , isDeepStrictEqual);
 
     render() {
-        const { stream } = this.props;
-        const points = this.getPoints(stream.results, false);
-        let maxY = points.length ? maxBy(points, 'y').y * 3 : 1;
-        maxY = maxY > 0 ? maxY : 1;
+        const { chart, chartSet } = this.props;
+        const isRealtime = this.props.usageType === UsageTypes.REALTIME;
 
-        const kWhs = calculateKWHs(calculateAverage(stream.channels, stream.results), stream.timers);
+        const lines = this.getPoints(chartSet, false);
+        const maxY = getMaxY(lines, 1.5);
+
+        const kWhs = calculateKWHs(calculateAverage(chartSet.channels, chartSet.results), chartSet.timers);
         const cost = calculateCost(kWhs, this.props.user.cost);
+
+        const Line = isRealtime ? RealtimeLine : HistoricalLine;
+        const format = getTimeFormat(chartSet.splitDurationPeriod, chart.usageType);
+
+        let isStreaming = false;
+        if (isRealtime) {
+            isStreaming = chartSet.connected && !chartSet.paused;
+        }
 
         return (
             <Grid columns={2} style={{ height: '110%', padding: '1em' }}>
-                <Grid.Column width={2} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                    <Button.Group vertical>
-                        <Button icon='play' onClick={this.props.fetchUsage} disabled={stream.connected} />
-                        <Button icon='stop' onClick={this.props.disconnect} disabled={!stream.connected} />
-                    </Button.Group>
+                <Grid.Column width={3} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                    {
+                        this.props.usageType === UsageTypes.REALTIME
+                            ? <Button icon={isStreaming ? 'pause' : 'play'} onClick={this.pauseStream} />
+                            : <Button fluid icon='sync' onClick={this.props.refresh} />
+                    }
                     <Statistic size='mini' label='kWh' value={stripLongDecimal(kWhs)} />
                     {
                         this.props.user.cost && this.props.user.cost > 0 &&
@@ -94,42 +116,20 @@ export class LineChart extends React.Component {
                     }
                     <EditMenuModal isChart
                         isOpen={this.state.isEditModalOpen}
-                        uuid={this.props.chartID}
+                        uuid={this.props.chart.uuid}
                         menuType='update'
                         groupType='chart'
                         toggleModal={this.toggleModal} />
                 </Grid.Column>
-                <Grid.Column width={14}>
+                <Grid.Column width={13}>
                     <AutoSizer>
                         {({ height, width }) =>
                             <Line
                                 height={height}
                                 width={width}
-                                data={[{ id: this.props.chartID, data: points }]}
-                                margin={{ top: 10, right: 0, bottom: 30, left: 60 }}
-                                xScale={{ type: 'time', format: '%Q' }}
-                                yScale={{ type: 'linear', min: 0, max: maxY }}
-                                enableGridX={false}
-                                enableDots={false}
-                                curve='monotoneX'
-                                animate={false}
-                                isInteractive={false}
-                                lineWidth={5}
-                                axisBottom={{
-                                    format: '%I:%M% %p',
-                                    legend: `${this.formatTime(moment().valueOf())}`,
-                                    legendOffset: 20,
-                                    legendPosition: 'end',
-                                    tickValues: 0,
-                                }}
-                                axisLeft={{
-                                    legend: 'Amps',
-                                    legendOffset: -40,
-                                    legendPosition: 'middle',
-                                }}
-                                theme={{
-                                    grid: { line: { stroke: '#ddd', strokeDasharray: '1 2' } },
-                                }} />
+                                lines={lines}
+                                maxY={maxY}
+                                format={format} />
                         }
                     </AutoSizer>
                 </Grid.Column>

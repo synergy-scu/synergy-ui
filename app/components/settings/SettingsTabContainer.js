@@ -20,6 +20,7 @@ export const mapDispatch = dispatch => {
         changeActiveChannel: channelID => dispatch(ActionCreators.changeActiveChannel(channelID)),
         extractChannels: groups => dispatch(ActionCreators.extractChannels(groups)),
         create: createGroupParams => dispatch(ActionCreators.createGroup(createGroupParams)),
+        createReminder: createReminderParams => dispatch(ActionCreators.createReminder(createReminderParams)),
     };
 };
 
@@ -30,11 +31,19 @@ export const mergeProps = (stateProps, dispatchProps, ownProps) => {
         members,
     });
 
+    const createReminder = ({ channel, time, message }) => dispatchProps.createReminder({
+        axios: ownProps.axios,
+        channel,
+        time,
+        message,
+    });
+
     return {
         ...stateProps,
         ...dispatchProps,
         ...ownProps,
         create,
+        createReminder,
     };
 };
 

@@ -66,8 +66,8 @@ export class PieChart extends React.Component {
             <Grid columns={2}>
                 <Grid.Column width={2}>
                     <Button.Group vertical>
-                        <Button content='Stream' onClick={this.props.fetchUsage} disabled={stream.connected} />
-                        <Button content='Disconnect' onClick={this.props.disconnect} disabled={!stream.connected} />
+                        {/* <Button content='Stream' onClick={this.props.fetchUsage} disabled={stream.connected} /> */}
+                        {/* <Button content='Disconnect' onClick={this.props.disconnect} disabled={!stream.connected} /> */}
                     </Button.Group>
                 </Grid.Column>
                 <Grid.Column width={14}>

@@ -55,7 +55,7 @@ export const fetchAllFinish = ({ requestID }) => {
 };
 
 export const fetchAll = ({ axios }) => dispatch => {
-    const routes = ['group', 'device', 'channel', 'chart'];
+    const routes = ['group', 'device', 'channel', 'chart', 'reminder'];
 
     const newFetchAll = fetchAllNew();
     const id = newFetchAll.payload.requestID;

@@ -89,10 +89,10 @@ export const fetchEntity = ({ axios, entityType, uuid }) => dispatch => {
             uuid,
             data,
         }));
-        console.log(data);
+        // console.log(data);
         return data;
     }).then(data => {
-        dispatch(extractChannels(entityType, uuid, data));
+        dispatch(extractChannels(plural, uuid, data));
     }).catch(error => {
         isResolved = true;
         dispatch(fetchEntityError({

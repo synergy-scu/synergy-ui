@@ -45,6 +45,18 @@ export const streams = (state = new Map(), action) => {
             delete IO.nsps[`/${action.payload.chartID}`];
             return nextState;
         }
+        case Actions.STREAM_PAUSE: {
+            const stream = state.get(action.payload.chartID);
+            stream.socket.emit(action.payload.shouldPause ? 'pause' : 'play', {
+                chartID: action.payload.chartID,
+                streamID: action.payload.streamID,
+            });
+            nextState.set(action.payload.chartID, defaultStream({
+                ...stream,
+                paused: action.payload.shouldPause,
+            }));
+            return nextState;
+        }
         case Actions.STREAM_RESULT: {
 
             /**

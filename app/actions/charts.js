@@ -3,7 +3,7 @@ import uuidv4 from 'uuid/v4';
 import Actions from './types';
 import { ExtendedChartOptions, ExtendedUsageOptions, UsageTypes } from '../api/constants/ChartTypes';
 import { fetchEntity } from './entities';
-import { changeChartTab, setChart } from './display';
+import { changeChartTab, changeChart } from './display';
 
 export const createChartStart = variables => {
     return {
@@ -95,7 +95,7 @@ export const createChart = ({ axios, name, members, chartType, usageType, option
                 uuid: data.id,
             }));
             dispatch(changeChartTab(usageType, 'view'));
-            dispatch(setChart(usageType, data.id, chartType));
+            dispatch(changeChart(usageType, data.id, chartType));
         }).catch(error => {
             isResolved = true;
             console.error(error);

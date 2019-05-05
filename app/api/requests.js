@@ -64,6 +64,7 @@ export const fetchAllRequest = ({
         devices: entityRequest({}),
         channels: entityRequest({}),
         charts: entityRequest({}),
+        reminders: entityRequest({}),
     },
     phase = RequestStates.INITIAL,
     ...params

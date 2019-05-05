@@ -24,28 +24,14 @@ export const setSidebarVisibility = (type, isVisible) => {
     };
 };
 
-export const setChart = (type, chartID, chartType) => {
+export const changeChart = (type, chart) => {
     return {
-        type: Actions.SET_CHART,
+        type: Actions.CHANGE_CHART,
         payload: {
-            chartID,
-            chartType,
+            chart,
         },
         meta: {
             type,
         },
     };
 };
-
-export const setChartType = (type, chartType) => {
-    return {
-        type: Actions.SET_CHART_TYPE,
-        payload: {
-            chartType,
-        },
-        meta: {
-            type,
-        },
-    };
-};
-

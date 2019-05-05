@@ -18,42 +18,40 @@ import EditMenuContainer from '../editor/EditMenuContainer';
 export class ChartPane extends React.Component {
     constructor(props) {
         super(props);
-
-        this.state = {
-            selectedChart: '',
-            selectedType: ChartTypes.NONE,
-        };
     }
 
     static propTypes = {
         usageType: PropTypes.oneOf(Object.values(UsageTypes)).isRequired,
+        activeTab: PropTypes.string.isRequired,
+        isSidebarOpen: PropTypes.bool.isRequired,
+        selectedChart: PropTypes.shape({
+            key: PropTypes.string.isRequired,
+            uuid: PropTypes.string.isRequired,
+            chartID: PropTypes.string.isRequired,
+            name: PropTypes.string.isRequired,
+            chartType: PropTypes.oneOf(Object.values(ChartTypes)).isRequired,
+        }).isRequired,
+
         entities: PropTypes.shape({
             charts: PropTypes.instanceOf(Map).isRequired,
         }).isRequired,
-        activeTab: PropTypes.string.isRequired,
-        changeTab: PropTypes.func.isRequired,
-        isSidebarOpen: PropTypes.bool.isRequired,
-        toggleSidebar: PropTypes.func.isRequired,
-        fetchUsage: PropTypes.func.isRequired,
-    };
 
-    reset = () => {
-        this.setState({
-            selectedChart: '',
-            selectedType: ChartTypes.NONE,
-        });
+        changeChart: PropTypes.func.isRequired,
+        changeTab: PropTypes.func.isRequired,
+        toggleSidebar: PropTypes.func.isRequired,
+
+        requestChart: PropTypes.func.isRequired,
     };
 
     selectChart = chart => {
-        this.setState({
-            selectedChart: chart.chartID,
-            selectedType: chart.chartType,
-        });
+        this.props.changeChart(chart);
+        this.props.requestChart(chart);
+    };
+
+    refresh = () => {
         if (this.props.usageType === UsageTypes.HISTORICAL) {
-            this.props.fetchUsage(chart);
+            this.props.requestChart(this.props.selectedChart);
         }
-        this.props.changeTab('view');
-        this.props.toggleSidebar(false);
     };
 
     chartSwitcher = memoize(chart => {
@@ -71,6 +69,8 @@ export class ChartPane extends React.Component {
         }
     }, isDeepStrictEqual);
 
+    filterCharts = memoize((charts, usageType) => [...charts.values()].filter(chart => chart.usageType === usageType));
+
     onTabChange = (event, { name }) => {
         if (this.props.activeTab !== name) {
             if (name === 'menu') {
@@ -83,23 +83,25 @@ export class ChartPane extends React.Component {
 
     render() {
 
-        const chart = this.props.entities.charts.get(this.state.selectedChart) || {};
+        const chart = this.props.selectedChart;
+        const hasChartInContainer = Boolean(chart.uuid.length);
+
         const ChartContainer = createChart(this.chartSwitcher(chart));
         const Component = this.props.activeTab === 'view' ? ChartContainer : EditMenuContainer;
         const componentProps = this.props.activeTab === 'view'
-            ? { chartID: this.state.selectedChart }
+            ? { chart, usageType: this.props.usageType, refresh: this.refresh }
             : { menuType: 'create', groupType: 'chart', usageType: this.props.usageType };
 
-        const chartPath = ` >> ${this.props.entities.charts.has(this.state.selectedChart) ? this.props.entities.charts.get(this.state.selectedChart).name || 'Unnamed Chart' : 'Unnamed Chart'}`;
+        const chartPath = ` >> ${hasChartInContainer ? chart.name || 'Unnamed Chart' : 'Unnamed Chart'}`;
 
         return (
             <Sidebar.Pushable>
                 <ChartSidebar
                     isMenuVisible={this.props.isSidebarOpen}
-                    charts={[...this.props.entities.charts.values()].filter(item => item.usageType === this.props.usageType)}
+                    charts={this.filterCharts(this.props.entities.charts, this.props.usageType)}
                     toggleSidebar={this.props.toggleSidebar}
                     selectChart={this.selectChart}
-                    selected={this.state.selectedChart} />
+                    selected={this.props.selectedChart} />
 
                 <Sidebar.Pusher id='charts' className='contrast'>
                     <Menu pointing secondary>
@@ -108,7 +110,7 @@ export class ChartPane extends React.Component {
                             onClick={this.onTabChange}>
                             <Icon name='bars' />
                         </Menu.Item>
-                        <Menu.Item content={this.props.activeTab === 'view' ? `View ${ExtendedUsageOptions[this.props.usageType].verbiage.capitalized}${this.state.selectedChart.length ? chartPath : ''}` : `Create ${ExtendedUsageOptions[this.props.usageType].verbiage.capitalized} Chart`} />
+                        <Menu.Item content={this.props.activeTab === 'view' ? `View ${ExtendedUsageOptions[this.props.usageType].verbiage.capitalized}${hasChartInContainer ? chartPath : ''}` : `Create ${ExtendedUsageOptions[this.props.usageType].verbiage.capitalized} Chart`} />
                         <Menu.Menu position='right'>
                             <Menu.Item link
                                 name='view'

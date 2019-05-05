@@ -125,7 +125,7 @@ export const usageError = ({ requestID, chartID, error, ...props }) => {
     };
 };
 
-export const requestUsage = ({ axios, chartID, chartMeta, variables, channels, members }) => dispatch => {
+export const requestHistory = ({ axios, chartID, chartMeta, variables, channels, members }) => dispatch => {
     const reverseLookup = new Map();
     members.forEach(member => {
         member.channels.forEach(channel => reverseLookup.set(channel, member.uuid));

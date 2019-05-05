@@ -66,6 +66,16 @@ export const streamClose = chartID => {
     };
 };
 
+export const streamPause = (chartID, shouldPause) => {
+    return {
+        type: Actions.STREAM_PAUSE,
+        payload: {
+            chartID,
+            shouldPause,
+        },
+    };
+};
+
 export const streamResult = (chartID, data, reverseLookup) => {
     return {
         type: Actions.STREAM_RESULT,

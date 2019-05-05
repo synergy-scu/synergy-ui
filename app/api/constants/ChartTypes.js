@@ -118,9 +118,10 @@ export const ExtendedUsageOptions = {
     }, {}),
 };
 
-export const defaultChart = ({ key = '', chartID = '', name = '', chartType = ChartTypes.NONE, usageType = UsageTypes.NONE, options = {}, count = 0, members = [], all = false, created = new Date(), updated = new Date() }) => {
+export const defaultChart = ({ chartID = '', name = '', chartType = ChartTypes.NONE, usageType = UsageTypes.NONE, options = {}, count = 0, members = [], all = false, created = new Date(), updated = new Date() }) => {
     return {
-        key,
+        key: chartID,
+        uuid: chartID,
         chartID,
         name,
         chartType,

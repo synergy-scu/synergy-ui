@@ -42,7 +42,7 @@ export class HistoricalDatePicker extends React.Component {
 
     render() {
         return (
-            <DateRangePicker noBorder hideKeyboardShortcutsPane
+            <DateRangePicker noBorder hideKeyboardShortcutsPanel
                 showClearDates={false}
                 openDirection='up'
                 withPortal={this.props.usePortal}
@@ -50,7 +50,7 @@ export class HistoricalDatePicker extends React.Component {
                 startDateId={START_DATE}
                 endDate={this.props.endDate}
                 endDateId={END_DATE}
-                numberOfMonths={this.props.usePortal ? 2 : 1}
+                numberOfMonths={2}
                 onDatesChange={this.props.onDateChange}
                 focusedInput={this.state.focusedInput}
                 onFocusChange={this.onFocusChange}

@@ -21,3 +21,18 @@
         }
     }
 }
+
+.time-picker {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .separator {
+        margin: 0 1em;
+        font-weight: 700;
+    }
+
+    .ui.button {
+        margin-left: 2em;
+    }
+}

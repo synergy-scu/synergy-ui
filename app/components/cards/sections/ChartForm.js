@@ -51,7 +51,7 @@ export const ChartForm = props => {
             <Form.Field className='no-margin-bottom'>
                 <label>Date</label>
                 <HistoricalDatePicker
-                    usePortal={props.isModal}
+                    usePortal
                     startDate={props.startDate}
                     endDate={props.endDate}
                     onDateChange={props.onDateChange} />

@@ -86,6 +86,20 @@ export const normalizeChannel = ({ name, channelID, deviceID, created, updated }
     };
 };
 
+export const normalizeReminder = ({ reminderID, channelID, message, time, created, updated }) => {
+    return {
+        key: reminderID,
+        uuid: reminderID,
+        reminderID,
+        channelID,
+        channel: {},
+        message,
+        time,
+        created,
+        updated,
+    };
+};
+
 export const extractChannels = (group, entities, extractedChannels = new Set()) => {
     group.members.forEach(member => {
         switch (member.type) {
@@ -133,6 +147,8 @@ export const normalize = (data, entityType) => {
             return normalizeDevice(data);
         case 'channels':
             return normalizeChannel(data);
+        case 'reminders':
+            return normalizeReminder(data);
         default:
             return {};
     }

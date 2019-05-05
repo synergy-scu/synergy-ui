@@ -30,19 +30,17 @@ export const mergeProps = (stateProps, dispatchProps, ownProps) => {
     const submitFn = get(dispatchPropFnMapping, ownProps.groupType, dispatchPropFnMapping.none);
 
     const submit = submitParams => {
-        console.warn('111', submitParams);
         if (submitParams.startDate) {
             submitParams.options.startDate = submitParams.startDate.hour(0).toISOString(true);
         }
 
         if (submitParams.endDate) {
-            submitParams.options.endDate = submitParams.endDate.hour(0).toISOString(true);
+            submitParams.options.endDate = submitParams.endDate.hour(23).toISOString(true);
         }
 
         delete submitParams.startDate;
         delete submitParams.endDate;
 
-        console.warn('222', submitParams);
         submitFn({
             axios: ownProps.axios,
             ...submitParams,
