@@ -67,17 +67,20 @@ export class PieChart extends React.Component {
         }
     };
 
-    getPoints = memoize((chartSet, isRealtime) =>
+    getPoints = memoize((results, isRealtime, isGrouped) =>
         isRealtime
-            ? pieChartReal(chartSet.results, this.props.entities.names, false)
-            : pieChartHistory(chartSet.results, this.props.entities.names, false)
+            ? pieChartReal(results, this.props.entities.names, isGrouped)
+            : pieChartHistory(results, this.props.entities.names, isGrouped)
     , isDeepStrictEqual);
 
     render() {
         const { chart, chartSet } = this.props;
         const isRealtime = this.props.usageType === UsageTypes.REALTIME;
 
-        const slices = this.getPoints(chartSet, false);
+        const slices = chartSet.results.length
+            ? this.getPoints(chartSet.results, isRealtime, false)
+            : [{ id: 'empty', label: 'empty', value: 100 }];
+
         const isEmpty = Array.isArray(slices) && Boolean(slices.length === 1) && slices[0].id === 'empty';
 
         const kWhs = calculateKWHs(calculateAverage(chartSet.channels, chartSet.results), chartSet.timers);

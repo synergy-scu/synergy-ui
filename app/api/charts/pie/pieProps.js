@@ -10,7 +10,9 @@ export const pieProps = {
     padAngle: 0.7,
     cornerRadius: 3,
     slicesLabelsSkipAngle: 10,
-    radialLabel: segment => segment.label,
+    innerRadius: 0.05,
+    radialLabel: slice => slice.label,
+    sliceLabel: slice => `${slice.value.toFixed(1)}%`,
 };
 
 export const noDataProps = {

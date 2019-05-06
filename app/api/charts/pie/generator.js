@@ -15,13 +15,18 @@ export const pieChartReal = (results, names, isGrouped = false) => {
         ];
     }
 
-    return [...lastResult[key].entries()].map(([uuid, amperage]) => {
-        return {
-            id: uuid,
-            label: names.get(uuid),
-            value: round(amperage / total, 2),
-        };
+    const slices = [];
+    [...lastResult[key].entries()].forEach(([uuid, amperage]) => {
+        if (amperage !== 0) {
+            slices.push({
+                id: uuid,
+                label: names.get(uuid),
+                value: round(amperage / total, 2) * 100,
+            });
+        }
     });
+
+    return slices;
 };
 
 export const pieChartHistory = (results, names, isGrouped = false) => {
@@ -43,11 +48,16 @@ export const pieChartHistory = (results, names, isGrouped = false) => {
         ];
     }
 
-    return Object.entries(totals).map(([uuid, value]) => {
-        return {
-            id: uuid,
-            label: names.get(uuid),
-            value: round(value / total, 2),
-        };
+    const slices = [];
+    Object.entries(totals).forEach(([uuid, value]) => {
+        if (value !== 0) {
+            slices.push({
+                id: uuid,
+                label: names.get(uuid),
+                value: round(value / total, 2) * 100,
+            });
+        }
     });
+
+    return slices;
 };
