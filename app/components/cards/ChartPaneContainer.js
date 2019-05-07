@@ -3,8 +3,9 @@ import { withAxios } from 'react-axios';
 
 import ActionCreators from '../../actions';
 import { ChartPane } from './ChartPane';
-import { UsageTypes } from '../../api/constants/ChartTypes';
+import { UsageTypes, defaultChart } from '../../api/constants/ChartTypes';
 import { extractGroupedMembers, getChannelsFromGroup } from '../../api/socket/usageUtils';
+import { fetchChart } from '../../api/charts';
 
 export const mapState = state => {
     return {
@@ -28,33 +29,14 @@ export const mapDispatch = dispatch => {
 export const mergeProps = (stateProps, dispatchProps, ownProps) => {
     const chartSettings = ownProps.usageType === UsageTypes.REALTIME ? stateProps.realtime : stateProps.historical;
 
-    const requestChart = chart => {
-        const members = extractGroupedMembers(chart.members, stateProps.entities);
-        const channels = getChannelsFromGroup(members);
-
-        const variables = {};
-        if (chart.options.startDate) {
-            variables.startDate = chart.options.startDate;
-        }
-
-        if (chart.options.endDate) {
-            variables.endDate = chart.options.endDate;
-        }
-
-        const requestFn = ownProps.usageType === UsageTypes.REALTIME ? dispatchProps.requestStream : dispatchProps.requestHistory;
-        return requestFn({
-            axios: ownProps.axios,
-            chartID: chart.chartID,
-            chartMeta: {
-                chartType: chart.chartType,
-                usageType: chart.usageType,
-                ...chart.options,
-            },
-            variables,
-            channels: [...channels.values()],
-            members,
-        });
-    };
+    const requestChart = chart => fetchChart({
+        axios: ownProps.axios,
+        usageType: ownProps.usageType,
+        chartID: chart.uuid,
+        entities: stateProps.entities,
+        requestStream: dispatchProps.requestStream,
+        requestHistory: dispatchProps.requestHistory,
+    });
 
     return {
         ...stateProps,
@@ -63,6 +45,7 @@ export const mergeProps = (stateProps, dispatchProps, ownProps) => {
         activeTab: chartSettings.chartsTab,
         isSidebarOpen: chartSettings.isSidebarOpen,
         selectedChart: chartSettings.selectedChart,
+        chart: stateProps.entities.charts.get(chartSettings.selectedChart) || defaultChart({}),
         requestChart,
 
         changeTab: tab => dispatchProps.changeTab(ownProps.usageType, tab),

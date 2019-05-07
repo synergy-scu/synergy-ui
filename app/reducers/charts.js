@@ -1,10 +1,12 @@
 import { get } from 'lodash';
 
 import Actions from '../actions';
-import { defaultChart } from '../api/constants/ChartTypes';
 
 const chartsTab = type => (state = 'view', action) => {
     if (get(action, 'meta.type', '') !== type) {
+        if (action.type === Actions.FETCH_ENTITY_SUCCESS && action.payload.entityType === 'charts' && action.payload.usageType === type) {
+            return 'view';
+        }
         return state;
     }
 
@@ -33,8 +35,11 @@ const isSidebarOpen = type => (state = false, action) => {
     }
 };
 
-const selectedChart = type => (state = defaultChart({}), action) => {
+const selectedChart = type => (state = '', action) => {
     if (get(action, 'meta.type', '') !== type) {
+        if (action.type === Actions.FETCH_ENTITY_SUCCESS && action.payload.entityType === 'charts' && action.payload.usageType === type) {
+            return action.payload.uuid;
+        }
         return state;
     }
 

@@ -1,3 +1,5 @@
+import PropTypes from 'prop-types';
+
 export const DisplayTypes = {
     CUMULATIVE: Symbol('CUMULATIVE'),
     PERCENT: Symbol('PERCENT'),
@@ -133,4 +135,24 @@ export const defaultChart = ({ chartID = '', name = '', chartType = ChartTypes.N
         created,
         updated,
     };
+};
+
+export const chartProps = {
+    key: PropTypes.string.isRequired,
+    uuid: PropTypes.string.isRequired,
+    chartID: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    chartType: PropTypes.symbol.isRequired,
+    usageType: PropTypes.symbol.isRequired,
+    options: PropTypes.object.isRequired,
+    count: PropTypes.number,
+    members: PropTypes.arrayOf(PropTypes.shape({
+        uuid: PropTypes.string,
+        type: PropTypes.string,
+        chartID: PropTypes.string,
+        add: PropTypes.string,
+    })).isRequired,
+    all: PropTypes.string,
+    created: PropTypes.instanceOf(Date),
+    updated: PropTypes.instanceOf(Date),
 };

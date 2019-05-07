@@ -1,61 +1,39 @@
-import { round, last } from 'lodash';
+import UMPStore from '../Store';
 
-import { DisplayTypes } from './constants/ChartTypes';
-import { ampsTokWh } from "./socket/usageUtils";
+import { UsageTypes, defaultChart } from './constants/ChartTypes';
+import { extractGroupedMembers, getChannelsFromGroup } from './socket/usageUtils';
 
-export const pieChart = (results, channels, type = DisplayTypes.PERCENT) => {
-    const segments = [];
-    if (type === DisplayTypes.PERCENT && results.length) {
-        const lastItem = last(results);
-        const channelAmps = [...lastItem.channels.entries()];
+export const fetchChart = ({ axios, usageType, chartID, requestStream, requestHistory }) => {
+    const entities = UMPStore.store.getState().entities;
+    const chart = entities.charts.get(chartID) || defaultChart();
 
-        const total = channelAmps.reduce((acc, [_, current]) => acc + current, 0);
-        channelAmps.forEach(([channel, current]) => {
-            const retrievedChannel = channels.get(channel) || {};
-            if (current !== 0) {
-                segments.push({
-                    id: channel,
-                    label: `${retrievedChannel.name || 'Unnamed Channel'} (kWh)`,
-                    value: ampsTokWh(round(current / total, 2)),
-                });
-            }
-        });
-        return segments;
-    }
+    if (chart.uuid.length) {
+        const members = extractGroupedMembers(chart.members, entities);
+        const channels = getChannelsFromGroup(members);
 
-
-    let total = 0;
-    const amps = {};
-    results.forEach(entry => {
-        entry.channels.forEach((current, channel) => {
-            amps[channel] = (amps[channel] || 0) + current;
-            total += current;
-        });
-    });
-
-    Object.entries(amps).forEach(([channel, current]) => {
-        const retrievedChannel = channels.get(channel) || {};
-        let value = 0;
-
-        if (current !== 0) {
-            switch (type) {
-                case DisplayTypes.AVG:
-                    value = ampsTokWh(round(current / results.length, 2));
-                    break;
-                case DisplayTypes.TOTAL:
-                    value = ampsTokWh(round(current, 1));
-                    break;
-                default:
-                    value = ampsTokWh(round(current / total, 2));
-                    break;
-            }
-            segments.push({
-                id: channel,
-                label: `${retrievedChannel.name || 'Unnamed Channel'} (kWh)`,
-                value,
-            });
+        const variables = {};
+        if (chart.options.startDate) {
+            variables.startDate = chart.options.startDate;
         }
-    });
 
-    return segments;
+        if (chart.options.endDate) {
+            variables.endDate = chart.options.endDate;
+        }
+
+        const requestFn = usageType === UsageTypes.REALTIME ? requestStream : requestHistory;
+        return UMPStore.dispatch(
+            requestFn({
+                axios,
+                chartID: chart.chartID,
+                chartMeta: {
+                    chartType: chart.chartType,
+                    usageType: chart.usageType,
+                    ...chart.options,
+                },
+                variables,
+                channels: [...channels.values()],
+                members,
+            })
+        );
+    }
 };

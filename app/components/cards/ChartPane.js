@@ -4,7 +4,7 @@ import { Sidebar, Menu, Icon, Segment, Popup } from 'semantic-ui-react';
 import memoize from 'memoize-one';
 import { isDeepStrictEqual } from 'util';
 
-import { ChartTypes, UsageTypes, ExtendedUsageOptions } from '../../api/constants/ChartTypes';
+import { ChartTypes, UsageTypes, ExtendedUsageOptions, defaultChart } from '../../api/constants/ChartTypes';
 
 import createChart from './charts/ChartContainer';
 import { LineChart } from './charts/LineChart';
@@ -24,7 +24,8 @@ export class ChartPane extends React.Component {
         usageType: PropTypes.oneOf(Object.values(UsageTypes)).isRequired,
         activeTab: PropTypes.string.isRequired,
         isSidebarOpen: PropTypes.bool.isRequired,
-        selectedChart: PropTypes.shape({
+        selectedChart: PropTypes.string.isRequired,
+        chart: PropTypes.shape({
             key: PropTypes.string.isRequired,
             uuid: PropTypes.string.isRequired,
             chartID: PropTypes.string.isRequired,
@@ -44,13 +45,13 @@ export class ChartPane extends React.Component {
     };
 
     selectChart = chart => {
-        this.props.changeChart(chart);
+        this.props.changeChart(chart.uuid);
         this.props.requestChart(chart);
     };
 
     refresh = () => {
         if (this.props.usageType === UsageTypes.HISTORICAL) {
-            this.props.requestChart(this.props.selectedChart);
+            this.props.requestChart(this.props.chart);
         }
     };
 
@@ -83,7 +84,7 @@ export class ChartPane extends React.Component {
 
     render() {
 
-        const chart = this.props.selectedChart;
+        const { chart } = this.props;
         const hasChartInContainer = Boolean(chart.uuid.length);
 
         const ChartContainer = createChart(this.chartSwitcher(chart));

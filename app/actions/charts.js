@@ -1,9 +1,8 @@
 import uuidv4 from 'uuid/v4';
 
 import Actions from './types';
-import { ExtendedChartOptions, ExtendedUsageOptions, UsageTypes } from '../api/constants/ChartTypes';
+import { ExtendedChartOptions, ExtendedUsageOptions } from '../api/constants/ChartTypes';
 import { fetchEntity } from './entities';
-import { changeChartTab, changeChart } from './display';
 
 export const createChartStart = variables => {
     return {
@@ -38,7 +37,7 @@ export const createChartError = (requestID, variables, error) => {
     };
 };
 
-export const createChart = ({ axios, name, members, chartType, usageType, options }) => dispatch => {
+export const createChart = ({ axios, menuType, name, members, chartType, usageType, options }) => dispatch => {
     const actionVariables = {
         name,
         members,
@@ -91,11 +90,11 @@ export const createChart = ({ axios, name, members, chartType, usageType, option
             }));
             dispatch(fetchEntity({
                 axios,
+                parentRequestType: menuType,
                 entityType: 'chart',
                 uuid: data.id,
+                usageType,
             }));
-            dispatch(changeChartTab(usageType, 'view'));
-            dispatch(changeChart(usageType, data.id, chartType));
         }).catch(error => {
             isResolved = true;
             console.error(error);

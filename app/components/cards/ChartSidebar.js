@@ -25,7 +25,7 @@ export const ChartSidebar = props => {
                     return (
                         <Menu.Item key={chart.key} as='a' onClick={onSelectChart}>
                             {chart.name || 'Unnamed Chart'}
-                            <Icon name={icon} color={props.selected.key === chart.key ? 'green' : null} />
+                            <Icon name={icon} color={props.selected === chart.key ? 'green' : null} />
                         </Menu.Item>
                     );
                 })
@@ -36,9 +36,7 @@ export const ChartSidebar = props => {
 
 ChartSidebar.propTypes = {
     isMenuVisible: PropTypes.bool,
-    selected: PropTypes.shape({
-        key: PropTypes.string.isRequired,
-    }),
+    selected: PropTypes.string.isRequired,
     charts: PropTypes.arrayOf(PropTypes.shape({
         key: PropTypes.string.isRequired,
         name: PropTypes.string,

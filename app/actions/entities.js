@@ -1,6 +1,8 @@
 import uuidv4 from 'uuid/v4';
 
 import Actions from './types';
+import { requestStream, requestHistory } from './usage';
+import { fetchChart } from '../api/charts';
 
 export const extractChannels = (entityType, uuid, data) => {
     return {
@@ -30,7 +32,7 @@ export const fetchEntityStart = ({ entityType, uuid }) => {
     };
 };
 
-export const fetchEntitySuccess = ({ requestID, entityType, uuid, data }) => {
+export const fetchEntitySuccess = ({ requestID, entityType, uuid, data, ...props }) => {
     return {
         type: Actions.FETCH_ENTITY_SUCCESS,
         payload: {
@@ -38,6 +40,7 @@ export const fetchEntitySuccess = ({ requestID, entityType, uuid, data }) => {
             entityType,
             uuid,
             data,
+            ...props,
         },
     };
 };
@@ -55,7 +58,7 @@ export const fetchEntityError = ({ requestID, entityType, uuid, error }) => {
     };
 };
 
-export const fetchEntity = ({ axios, entityType, uuid }) => dispatch => {
+export const fetchEntity = ({ axios, entityType, uuid, ...props }) => dispatch => {
     const plural = `${entityType}s`;
 
     const newFetchRequest = fetchEntityStart({ entityType, uuid });
@@ -75,7 +78,7 @@ export const fetchEntity = ({ axios, entityType, uuid }) => dispatch => {
     }, 30 * 1000);
 
     const route = `${entityType}/get`;
-    axios.post(route, {
+    return axios.post(route, {
         [`${entityType}ID`]: uuid,
     }).then(response =>
         response.status === 200 && response.data
@@ -88,11 +91,22 @@ export const fetchEntity = ({ axios, entityType, uuid }) => dispatch => {
             entityType: plural,
             uuid,
             data,
+            ...props,
         }));
-        // console.log(data);
+
+        if (props.parentRequestType === 'create') {
+            fetchChart({
+                axios,
+                usageType: props.usageType,
+                chartID: uuid,
+                requestStream,
+                requestHistory,
+            });
+        }
         return data;
     }).then(data => {
         dispatch(extractChannels(plural, uuid, data));
+        return data;
     }).catch(error => {
         isResolved = true;
         dispatch(fetchEntityError({

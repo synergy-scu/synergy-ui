@@ -94,22 +94,27 @@ export class PieChart extends React.Component {
         return (
             <Grid columns={2} style={{ height: '110%', padding: '1em' }}>
                 <Grid.Column width={3} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                    {
+                    {/* {
                         this.props.usageType === UsageTypes.REALTIME
                             ? <Button icon={isStreaming ? 'pause' : 'play'} onClick={this.pauseStream} />
                             : <Button fluid icon='sync' onClick={this.props.refresh} />
+                    } */}
+                    {
+                        this.props.usageType === UsageTypes.HISTORICAL && <Button fluid icon='sync' onClick={this.props.refresh} />
                     }
                     <Statistic size='mini' label='kWh' value={stripLongDecimal(kWhs)} />
                     {
                         this.props.user.cost && this.props.user.cost > 0 &&
                         <Statistic size='mini' label='USD' value={stripLongDecimal(cost)} style={{ margin: 0 }} />
                     }
-                    <EditMenuModal isChart
-                        isOpen={this.state.isEditModalOpen}
-                        uuid={this.props.chart.uuid}
-                        menuType='update'
-                        groupType='chart'
-                        toggleModal={this.toggleModal} />
+                    {
+                        false && <EditMenuModal isChart
+                            isOpen={this.state.isEditModalOpen}
+                            uuid={this.props.chart.uuid}
+                            menuType='update'
+                            groupType='chart'
+                            toggleModal={this.toggleModal} />
+                    }
                 </Grid.Column>
                 <Grid.Column width={13}>
                     <AutoSizer>

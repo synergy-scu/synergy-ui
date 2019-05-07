@@ -4,7 +4,7 @@ import MomentProps from 'react-moment-proptypes';
 import { Form, Checkbox, Button, Header } from 'semantic-ui-react';
 import { capitalize } from 'lodash';
 
-import { ChartTypes, ChartOptions, ExtendedChartOptions } from '../../../api/constants/ChartTypes';
+import { ChartTypes, ChartOptions, ExtendedChartOptions, UsageTypes } from '../../../api/constants/ChartTypes';
 import { HistoricalDatePicker } from './HistoricalDatePicker';
 
 const ChartDropdownOptions = Object.keys(ChartTypes)
@@ -48,14 +48,17 @@ export const ChartForm = props => {
                     </Form.Field>
                 )
             }
-            <Form.Field className='no-margin-bottom'>
-                <label>Date</label>
-                <HistoricalDatePicker
-                    usePortal
-                    startDate={props.startDate}
-                    endDate={props.endDate}
-                    onDateChange={props.onDateChange} />
-            </Form.Field>
+            {
+                props.usageType === UsageTypes.HISTORICAL &&
+                    <Form.Field className='no-margin-bottom'>
+                        <label>Date</label>
+                        <HistoricalDatePicker
+                            usePortal
+                            startDate={props.startDate}
+                            endDate={props.endDate}
+                            onDateChange={props.onDateChange} />
+                    </Form.Field>
+            }
             <span className='secondary block-span' style={{ marginLeft: '0.5em' }}>You must choose at least one date</span>
             <span className='secondary block-span margin-bottom' style={{ marginLeft: '0.5em' }}>Leave one blank to specify all dates before/after</span>
             <Button fluid
@@ -78,6 +81,7 @@ ChartForm.propTypes = {
     isModal: PropTypes.bool,
     isSubmitDisabled: PropTypes.bool,
     menuType: PropTypes.PropTypes.oneOf(['create', 'update']).isRequired,
+    usageType: PropTypes.oneOf(Object.values(UsageTypes)).isRequired,
 
     name: PropTypes.string.isRequired,
     selected: PropTypes.oneOf(Object.values(ChartTypes)).isRequired,

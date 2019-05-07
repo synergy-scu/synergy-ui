@@ -389,6 +389,7 @@ export class EditMenu extends React.Component {
                                 <ChartForm
                                     isModal={this.props.isModal}
                                     menuType={this.props.menuType}
+                                    usageType={this.props.usageType}
                                     name={this.state.name}
                                     selected={this.state.selectedChart}
                                     options={this.state.chartOptions}

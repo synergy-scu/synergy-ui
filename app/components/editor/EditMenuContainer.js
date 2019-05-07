@@ -43,6 +43,7 @@ export const mergeProps = (stateProps, dispatchProps, ownProps) => {
 
         submitFn({
             axios: ownProps.axios,
+            menuType: ownProps.menuType,
             ...submitParams,
         });
     };
