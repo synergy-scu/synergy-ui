@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import memoize from 'memoize-one';
-import { timeFormat } from 'd3-time-format';
 import { isDeepStrictEqual } from 'util';
 
 import { Grid, Statistic, Button } from 'semantic-ui-react';
@@ -46,11 +45,11 @@ export class LineChart extends React.Component {
                 chartID: PropTypes.string.isRequired,
                 uuid: PropTypes.string.isRequired,
                 type: PropTypes.oneOf(['channel', 'device', 'group']).isRequired,
-                added: PropTypes.instanceOf(Date).isRequired,
+                added: PropTypes.any,
             })).isRequired,
             all: PropTypes.bool.isRequired,
-            created: PropTypes.instanceOf(Date).isRequired,
-            updated: PropTypes.instanceOf(Date).isRequired,
+            created: PropTypes.any,
+            updated: PropTypes.any,
         }).isRequired,
         // chartSet: PropTypes.shape(this.props.usageType === UsageTypes.REALTIME ? streamChartProps : historyChartProps).isRequired,
         refresh: PropTypes.func.isRequired,
@@ -102,13 +101,13 @@ export class LineChart extends React.Component {
         return (
             <Grid columns={2} style={{ height: '110%', padding: '1em' }}>
                 <Grid.Column width={3} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                    {/* {
+                    {
                         this.props.usageType === UsageTypes.REALTIME
                             ? <Button icon={isStreaming ? 'pause' : 'play'} onClick={this.pauseStream} />
                             : <Button fluid icon='sync' onClick={this.props.refresh} />
-                    } */}
+                    }
                     {
-                        this.props.usageType === UsageTypes.HISTORICAL && <Button fluid icon='sync' onClick={this.props.refresh} />
+                        // this.props.usageType === UsageTypes.HISTORICAL && <Button fluid icon='sync' onClick={this.props.refresh} />
                     }
                     <Statistic size='mini' label='kWh' value={stripLongDecimal(kWhs)} />
                     {

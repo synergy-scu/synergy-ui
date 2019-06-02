@@ -1,5 +1,14 @@
 import Actions from './types';
 
+export const changePane = pane => {
+    return {
+        type: Actions.CHANGE_PANE,
+        payload: {
+            pane,
+        },
+    };
+};
+
 export const changeChartTab = (type, tab) => {
     return {
         type: Actions.CHANGE_CHART_TAB,
@@ -24,11 +33,12 @@ export const setSidebarVisibility = (type, isVisible) => {
     };
 };
 
-export const changeChart = (type, chart) => {
+export const changeChart = (type, chart, isCumulative) => {
     return {
         type: Actions.CHANGE_CHART,
         payload: {
             chart,
+            isCumulative,
         },
         meta: {
             type,

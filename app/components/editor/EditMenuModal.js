@@ -35,7 +35,8 @@ export const EditMenuModal = props => {
                 <EditMenuContainer isModal
                     uuid={props.uuid}
                     menuType={props.menuType}
-                    groupType={props.groupType} />
+                    groupType={props.groupType}
+                    toggleModal={props.toggleModal} />
             </Modal.Content>
         </Modal>
     );

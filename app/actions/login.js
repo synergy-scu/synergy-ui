@@ -1,6 +1,7 @@
 import uuidv4 from 'uuid/v4';
 import bcrypt from 'bcryptjs';
 import { get } from 'lodash';
+import { push as changePage } from 'react-router-redux';
 
 import { default as Actions } from './types';
 import { fetchAll } from './queryAll';
@@ -81,6 +82,7 @@ export const userLogin = ({ email, password, saveSession, axios }) => {
                             }));
 
                             dispatch(fetchAll({ axios }));
+                            dispatch(changePage('/home'));
                         } else {
                             const { type, message, altMessage } = ErrorTypes.INVALID_PASSWORD;
                             dispatch(loginError({

@@ -3,6 +3,12 @@ import uuidv4 from 'uuid/v4';
 import Actions from './types';
 import { capitalize } from '../api/utils';
 import AXIOS_TIMEOUT from '../api/constants/AxiosTimeout';
+import { updateCumulativeChart, toggleCumulative } from './charts';
+import { getCumulativeChart, fetchChart } from '../api/charts';
+import { UsageTypes } from '../api/constants/ChartTypes';
+import { normalize } from '../api/normalize/normalize';
+import { requestStream } from './usage';
+import { extractGroupedMembers, getChannelsFromGroup } from '../api/socket/usageUtils';
 
 export const fetchAllNew = () => {
     return {
@@ -88,6 +94,37 @@ export const fetchAll = ({ axios }) => dispatch => {
                     entityType,
                     data,
                 }));
+
+                if (route === 'channel') {
+                    const members = [];
+                    const normalizedChannels = new Map(data.map(channel => {
+                        const normalizedChannel = normalize(channel, 'channels');
+                        members.push({
+                            uuid: normalizedChannel.key,
+                            type: channel,
+                            channels: new Set([normalizedChannel.uuid]),
+                        });
+                        return [normalizedChannel.key, normalizedChannel];
+                    }));
+
+                    const chart = getCumulativeChart(uuidv4(), UsageTypes.REALTIME, normalizedChannels);
+
+                    dispatch(updateCumulativeChart(UsageTypes.REALTIME, chart));
+                    dispatch(toggleCumulative(UsageTypes.REALTIME, true));
+                    dispatch(requestStream({
+                        axios,
+                        chartID: chart.uuid,
+                        chartMeta: {
+                            chartType: chart.chartType,
+                            usageType: chart.usageType,
+                            ...chart.options,
+                        },
+                        variables: {},
+                        members,
+                        channels: [...getChannelsFromGroup(members).values()],
+
+                    }));
+                }
             }).catch(error => {
                 isResolved = true;
                 console.error(error);

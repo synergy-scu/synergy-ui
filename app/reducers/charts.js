@@ -1,6 +1,8 @@
 import { get } from 'lodash';
+import uuidv4 from 'uuid/v4';
 
 import Actions from '../actions';
+import { getCumulativeChart } from '../api/charts';
 
 const chartsTab = type => (state = 'view', action) => {
     if (get(action, 'meta.type', '') !== type) {
@@ -44,8 +46,38 @@ const selectedChart = type => (state = '', action) => {
     }
 
     switch (action.type) {
+        case Actions.UPDATE_CUMULATIVE_CHART:
+            return action.payload.chart.uuid;
         case Actions.CHANGE_CHART:
             return action.payload.chart;
+        default:
+            return state;
+    }
+};
+
+const cumulativeChart = type => (state = getCumulativeChart(uuidv4(), type, new Map()), action) => {
+    if (get(action, 'meta.type', '') !== type) {
+        return state;
+    }
+
+    switch (action.type) {
+        case Actions.UPDATE_CUMULATIVE_CHART:
+            return action.payload.chart;
+        default:
+            return state;
+    }
+};
+
+const isCumulative = type => (state = true, action) => {
+    if (get(action, 'meta.type', '') !== type) {
+        return state;
+    }
+
+    switch (action.type) {
+        case Actions.CHANGE_CHART:
+            return action.payload.isCumulative;
+        case Actions.TOGGLE_CUMULATIVE:
+            return action.payload.isEnabled;
         default:
             return state;
     }
@@ -56,5 +88,7 @@ export default type => {
         chartsTab: chartsTab(type),
         isSidebarOpen: isSidebarOpen(type),
         selectedChart: selectedChart(type),
+        cumulativeChart: cumulativeChart(type),
+        isCumulative: isCumulative(type),
     };
 };

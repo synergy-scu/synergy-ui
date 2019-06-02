@@ -24,7 +24,7 @@ const store = SynergyStore.store;
 const history = SynergyStore.history;
 const instance = Axios.create({
     baseURL: '/api/',
-    timeout: 30000,
+    timeout: 600000,
     method: 'post',
     transformResponse: [data => Object.values(JSON.parse(data))[0]],
 });

@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Input, Dropdown, Button } from 'semantic-ui-react';
+import { Input, Dropdown } from 'semantic-ui-react';
 
 const timeSelectorOptions = [
     { key: 'am', value: 'am', text: 'AM' },

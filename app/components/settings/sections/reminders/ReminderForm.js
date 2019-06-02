@@ -13,9 +13,9 @@ export class ReminderForm extends React.Component {
             channel: '',
             message: '',
             time: {
-                hour: moment().hour().toString(),
+                hour: (moment().hour() > 12 ? moment().hour(moment().hour() - 12).hour() : moment().hour()).toString(),
                 minute: moment().minute().toString(),
-                period: 'am',
+                period: moment().hour() > 12 ? 'pm' : 'am',
             },
         };
     }
@@ -36,9 +36,9 @@ export class ReminderForm extends React.Component {
             channel: '',
             message: '',
             time: {
-                hour: moment().hour().toString(),
+                hour: (moment().hour() > 12 ? moment().hour(moment().hour() - 12) : moment().hour()).toString(),
                 minute: moment().minute().toString(),
-                period: 'am',
+                period: moment().hour() > 12 ? 'pm' : 'am',
             },
         });
     };
@@ -46,7 +46,7 @@ export class ReminderForm extends React.Component {
     create = () => {
         const hour = parseInt(this.state.time.hour, 10);
         const minute = parseInt(this.state.time.minute, 10);
-        const time = moment().hour(hour).minute(minute);
+        const time = moment().hour(hour).minute(minute).second(0).millisecond(0);
 
         if (this.state.time.period === 'pm') {
             time.add(12, 'h');

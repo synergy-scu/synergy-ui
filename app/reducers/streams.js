@@ -40,14 +40,32 @@ export const streams = (state = new Map(), action) => {
                 connected: false,
             }));
             return nextState;
-        case Actions.STREAM_CLOSE: {
-            nextState.delete(action.payload.chartID);
-            delete IO.nsps[`/${action.payload.chartID}`];
+        case Actions.CHANGE_CHART:
+            state.forEach(stream => {
+                if (stream.chartID === action.payload.chartID && stream.paused) {
+                    stream.socket.emit('play', {
+                        chartID: action.payload.chartID,
+                        streamID: action.payload.streamID,
+                    });
+                    nextState.set(action.payload.chartID, defaultStream({
+                        ...stream,
+                        paused: false,
+                    }));
+                } else if (stream.chartID !== action.payload.chartID) {
+                    stream.socket.emit('pause', {
+                        chartID: action.payload.chartID,
+                        streamID: action.payload.streamID,
+                    });
+                    nextState.set(stream.chartID, defaultStream({
+                        ...stream,
+                        paused: true,
+                    }));
+                }
+            });
             return nextState;
-        }
         case Actions.STREAM_PAUSE: {
             const stream = state.get(action.payload.chartID);
-            stream.socket.emit(action.payload.shouldPause ? 'pause' : 'play', {
+            stream.socket.emit(stream.paused ? 'play' : 'pause', {
                 chartID: action.payload.chartID,
                 streamID: action.payload.streamID,
             });

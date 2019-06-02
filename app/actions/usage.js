@@ -1,8 +1,11 @@
 import uuidv4 from 'uuid/v4';
+import moment from 'moment';
 
 import Actions from './types';
 import { streamUsage } from './stream';
 import AXIOS_TIMEOUT from '../api/constants/AxiosTimeout';
+
+import preLoadedData from '../../cumulative-history.json';
 
 export const usageStreamStart = ({ chartID, chartMeta, variables }) => {
     return {
@@ -81,7 +84,6 @@ export const requestStream = ({ axios, chartID, chartMeta, variables, channels, 
         }).catch(error => {
             console.error(error);
             isResolved = true;
-            // dispatch(usageStreamError({ requestID, chartMeta, variables, error }));
         });
 };
 
@@ -125,13 +127,16 @@ export const usageError = ({ requestID, chartID, error, ...props }) => {
     };
 };
 
-export const requestHistory = ({ axios, chartID, chartMeta, variables, channels, members }) => dispatch => {
+export const requestHistory = ({ axios, chartID, chartMeta, variables, channels, members, ...props }) => dispatch => {
     const reverseLookup = new Map();
     members.forEach(member => {
         member.channels.forEach(channel => reverseLookup.set(channel, member.uuid));
     });
 
-    const newUsageAction = usageStart({ chartID, chartMeta, variables, channels, members });
+    const newUsageAction = usageStart({ chartID, chartMeta, variables: props.isCumulative ? {
+        startDate: moment('2019-04-29'),
+        endDate: moment('2019-05-07'),
+    } : variables, channels, members });
     const requestID = newUsageAction.payload.requestID;
     dispatch(newUsageAction);
 
@@ -144,7 +149,18 @@ export const requestHistory = ({ axios, chartID, chartMeta, variables, channels,
                 error: 'Usage request timed out',
             }));
         }
-    }, AXIOS_TIMEOUT);
+    }, 5 * 60 * 1000);
+
+    if (props.isCumulative) {
+        isResolved = true;
+        dispatch(usageSuccess({
+            requestID,
+            chartID,
+            data: preLoadedData,
+            reverseLookup,
+        }));
+        return;
+    }
 
     axios.post('usage/history', { chartID, variables, channels })
         .then(response =>

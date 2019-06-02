@@ -105,3 +105,27 @@ export const createChart = ({ axios, menuType, name, members, chartType, usageTy
             }));
         });
 };
+
+export const toggleCumulative = (type, isEnabled) => {
+    return {
+        type: Actions.TOGGLE_CUMULATIVE,
+        payload: {
+            isEnabled,
+        },
+        meta: {
+            type,
+        },
+    };
+};
+
+export const updateCumulativeChart = (type, chart) => {
+    return {
+        type: Actions.UPDATE_CUMULATIVE_CHART,
+        payload: {
+            chart,
+        },
+        meta: {
+            type,
+        },
+    };
+};

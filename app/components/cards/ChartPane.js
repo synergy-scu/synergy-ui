@@ -4,7 +4,7 @@ import { Sidebar, Menu, Icon, Segment, Popup } from 'semantic-ui-react';
 import memoize from 'memoize-one';
 import { isDeepStrictEqual } from 'util';
 
-import { ChartTypes, UsageTypes, ExtendedUsageOptions, defaultChart } from '../../api/constants/ChartTypes';
+import { ChartTypes, UsageTypes, ExtendedUsageOptions } from '../../api/constants/ChartTypes';
 
 import createChart from './charts/ChartContainer';
 import { LineChart } from './charts/LineChart';
@@ -31,27 +31,48 @@ export class ChartPane extends React.Component {
             chartID: PropTypes.string.isRequired,
             name: PropTypes.string.isRequired,
             chartType: PropTypes.oneOf(Object.values(ChartTypes)).isRequired,
+            all: PropTypes.bool.isRequired,
         }).isRequired,
 
         entities: PropTypes.shape({
             charts: PropTypes.instanceOf(Map).isRequired,
         }).isRequired,
+        cumulativeChart: PropTypes.string.isRequired,
 
         changeChart: PropTypes.func.isRequired,
         changeTab: PropTypes.func.isRequired,
         toggleSidebar: PropTypes.func.isRequired,
 
+        streams: PropTypes.instanceOf(Map).isRequired,
+        histories: PropTypes.instanceOf(Map).isRequired,
+
         requestChart: PropTypes.func.isRequired,
     };
 
-    selectChart = chart => {
-        this.props.changeChart(chart.uuid);
-        this.props.requestChart(chart);
+    componentDidMount() {
+        if (this.props.usageType === UsageTypes.HISTORICAL && this.props.isCumulative && this.props.entities.channels.size > 0) {
+            this.props.requestChart(this.props.cumulativeChart.uuid, true);
+        }
+    }
+
+    selectChart = (chartID, isCumulative = false) => {
+        this.props.changeChart(chartID, isCumulative);
+        if (this.props.usageType === UsageTypes.REALTIME ) {
+            if (!this.props.streams.has(chartID)) {
+                this.props.requestChart(chartID, isCumulative);
+            } else if (this.props.streams.get(chartID).paused) {
+                this.props.pauseStream(chartID, );
+            }
+        } else if (this.props.usageType === UsageTypes.HISTORICAL) {
+            if (!this.props.histories.has(chartID)) {
+                this.props.requestChart(chartID, isCumulative);
+            }
+        }
     };
 
     refresh = () => {
         if (this.props.usageType === UsageTypes.HISTORICAL) {
-            this.props.requestChart(this.props.chart);
+            this.props.requestChart(this.props.chart.uuid, this.props.chart.all);
         }
     };
 
@@ -99,10 +120,12 @@ export class ChartPane extends React.Component {
             <Sidebar.Pushable>
                 <ChartSidebar
                     isMenuVisible={this.props.isSidebarOpen}
+                    usageType={this.props.usageType}
                     charts={this.filterCharts(this.props.entities.charts, this.props.usageType)}
                     toggleSidebar={this.props.toggleSidebar}
                     selectChart={this.selectChart}
-                    selected={this.props.selectedChart} />
+                    selected={this.props.selectedChart}
+                    cumulativeChart={this.props.cumulativeChart} />
 
                 <Sidebar.Pusher id='charts' className='contrast'>
                     <Menu pointing secondary>

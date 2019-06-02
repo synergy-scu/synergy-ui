@@ -4,3 +4,5 @@ build/
 *.envrc
 .cache/
 .DS_Store
+cumulative-history.json
+generateData.js

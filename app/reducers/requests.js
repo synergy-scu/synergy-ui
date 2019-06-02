@@ -46,3 +46,16 @@ export const loginRequest = (state = request({}), action) => {
             return state;
     }
 };
+
+export const historyRequest = (state = RequestStates.INITIAL, action) => {
+    switch (action.type) {
+        case Actions.USAGE_START:
+            return RequestStates.LOADING;
+        case Actions.USAGE_SUCCESS:
+            return RequestStates.SUCCESS;
+        case Actions.USAGE_ERROR:
+            return RequestStates.ERRORED;
+        default:
+            return state;
+    }
+};

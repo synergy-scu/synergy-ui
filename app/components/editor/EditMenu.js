@@ -84,6 +84,7 @@ export class EditMenu extends React.Component {
         menuType: PropTypes.oneOf(['create', 'update']).isRequired,
         usageType: PropTypes.oneOf(Object.values(UsageTypes)),
         submit: PropTypes.func.isRequired,
+        toggleModal: PropTypes.func,
     };
 
     reset = () => {
@@ -100,6 +101,10 @@ export class EditMenu extends React.Component {
     };
 
     submit = () => {
+        if (this.props.isModal) {
+            this.props.toggleModal();
+        }
+
         if (this.props.groupType === 'group') {
             if (this.props.menuType === 'create') {
                 this.props.submit({
@@ -310,7 +315,7 @@ export class EditMenu extends React.Component {
 
         isChartDisabled = this.props.usageType === UsageTypes.HISTORICAL ? isChartDisabled || !this.state.startDate && !this.state.endDate : isChartDisabled;
 
-        console.log(!this.state.selection.size, this.state.name.length < 3, this.state.selectedChart === ChartTypes.NONE, !this.state.startDate, !this.state.endDate);
+        // console.log(!this.state.selection.size, this.state.name.length < 3, this.state.selectedChart === ChartTypes.NONE, !this.state.startDate, !this.state.endDate);
         return (
             <Grid>
                 <Grid.Column width={isForGroups ? 5 : 4} className='squarify'>
@@ -351,9 +356,10 @@ export class EditMenu extends React.Component {
                                 <Input fluid placeholder={`${caps} Name`} value={this.state.name} error={this.state.nameError} onChange={this.onNameChange} />
                                 <span className='secondary' style={{ marginLeft: '0.5em' }}>Names must be at least 3 characters long</span>
                                 <Button fluid
+                                    color='green'
                                     disabled={isGroupDisabled}
                                     content={`Create ${caps}`}
-                                    onClick={this.create}
+                                    onClick={this.submit}
                                     style={{ marginTop: '1em' }} />
                             </Segment>
                     }

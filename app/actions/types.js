@@ -1,5 +1,7 @@
 const chartActions = {
     CHANGE_CHART: 'CHANGE_CHART',
+    TOGGLE_CUMULATIVE: 'TOGGLE_CUMULATIVE',
+    UPDATE_CUMULATIVE_CHART: 'UPDATE_CUMULATIVE_CHART',
 
     CREATE_CHART_START: 'CREATE_CHART_START',
     CREATE_CHART_SUCCESS: 'CREATE_CHART_SUCCESS',
@@ -86,6 +88,7 @@ const streamActions = {
     STREAM_CLOSE: 'STREAM_CLOSE',
 
     STREAM_PAUSE: 'STREAM_PAUSE',
+    FORCE_PAUSE: 'FORCE_PAUSE',
 
     STREAM_NEW: 'STREAM_NEW',
     STREAM_RESULT: 'STREAM_RESULT',
@@ -102,6 +105,8 @@ export default {
     ...usageStreamActions,
     ...reminderActions,
     ...streamActions,
+
+    CHANGE_PANE: 'CHANGE_PANE',
 
     CHANGE_USER: 'CHANGE_USER',
     SET_USER_ID: 'SET_USER_ID',

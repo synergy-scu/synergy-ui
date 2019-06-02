@@ -76,6 +76,15 @@ export const streamPause = (chartID, shouldPause) => {
     };
 };
 
+export const forcePause = shouldPause => {
+    return {
+        type: Actions.FORCE_PAUSE,
+        payload: {
+            shouldPause,
+        },
+    };
+};
+
 export const streamResult = (chartID, data, reverseLookup) => {
     return {
         type: Actions.STREAM_RESULT,

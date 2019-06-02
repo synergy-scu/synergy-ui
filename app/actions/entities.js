@@ -3,6 +3,7 @@ import uuidv4 from 'uuid/v4';
 import Actions from './types';
 import { requestStream, requestHistory } from './usage';
 import { fetchChart } from '../api/charts';
+import { changeChart } from './display';
 
 export const extractChannels = (entityType, uuid, data) => {
     return {
@@ -95,13 +96,14 @@ export const fetchEntity = ({ axios, entityType, uuid, ...props }) => dispatch =
         }));
 
         if (props.parentRequestType === 'create') {
-            fetchChart({
+            dispatch(changeChart(props.usageType, uuid, false));
+            dispatch(fetchChart({
                 axios,
                 usageType: props.usageType,
                 chartID: uuid,
                 requestStream,
                 requestHistory,
-            });
+            }));
         }
         return data;
     }).then(data => {

@@ -6,3 +6,4 @@ export const AppLoader = () =>
         <Loader inline='centered' />
     </Dimmer>;
 
+export default AppLoader;
