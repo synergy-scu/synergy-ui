@@ -82,7 +82,7 @@
         "@nivo/bar": "^0.52.1",
         "@nivo/line": "^0.52.1",
         "@nivo/pie": "^0.52.1",
-        "axios": "^0.18.0",
+        "axios": "^0.21.1",
         "bcryptjs": "^2.4.3",
         "email-validator": "^2.0.4",
         "history": "^4.7.2",
