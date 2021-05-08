@@ -87,7 +87,7 @@
         "email-validator": "^2.0.4",
         "history": "^4.7.2",
         "json.date-extensions": "^1.2.2",
-        "lodash": "^4.17.11",
+        "lodash": "^4.17.21",
         "map.prototype.tojson": "^0.1.3",
         "memoize-one": "^5.0.0",
         "moment": "^2.23.0",
